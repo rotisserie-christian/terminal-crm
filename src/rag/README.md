@@ -16,7 +16,7 @@
 
 2. **Query-Time Retrieval** (each user message):
    - Generate embedding for user's query
-   - Calculate cosine similarity between query and all chunk embeddings
+   - Calculate cosine similarity between query and all chunk embeddings (bruteforce, but good enough for up to ~1m tokens)
    - Select top-k most similar chunks
    - Use tokenizer for precise token counting
    - Fit retrieved chunks within RAG token budget (25% of context window)
