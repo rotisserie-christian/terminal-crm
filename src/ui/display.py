@@ -138,6 +138,51 @@ class DisplayManager:
                 f"[warning]Skipped file {err.get('file')}: {err.get('error')}[/warning]"
             )
 
+    def display_dial_lead(self, lead, remaining=None):
+        """
+        Display a single lead for the dial screen
+
+        Args:
+            lead: Lead dict from get_next_dial_lead
+            remaining: Optional count of dialable leads still in queue
+        """
+        company = lead.get("company") or "(no company)"
+        phone = lead.get("phone") or "(no phone)"
+        status = lead.get("status") or "new"
+
+        def field(value):
+            text = "" if value is None else str(value).strip()
+            return text if text else "-"
+
+        def flag(value):
+            return "yes" if value else "no"
+
+        header = f"[bold {config.SECONDARY_COLOR}]{company}[/bold {config.SECONDARY_COLOR}]"
+        if remaining is not None:
+            header += f"\n[dim]Queue: {remaining} remaining[/dim]"
+
+        body = "\n".join(
+            [
+                f"[bold]Phone[/bold]    {phone}",
+                f"[bold]Status[/bold]   {status}",
+                f"[bold]Trade[/bold]    {field(lead.get('trade'))}",
+                f"[bold]Website[/bold]  {field(lead.get('website'))}",
+                f"[bold]Signals[/bold]  {field(lead.get('signals'))}",
+                f"[bold]Hiring[/bold]   {field(lead.get('hiring'))}",
+                f"[bold]Is hiring[/bold]  {flag(lead.get('is_hiring'))}",
+                f"[bold]Has ads[/bold]    {flag(lead.get('has_ads'))}",
+            ]
+        )
+
+        self.console.print()
+        self.console.print(
+            Panel(
+                f"{header}\n\n{body}",
+                title="Dial",
+                border_style=config.SECONDARY_COLOR,
+            )
+        )
+
     def display_error(self, message):
         """Display an error message"""
         self.console.print(f"[danger]Error: {message}[/danger]")

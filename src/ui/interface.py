@@ -48,6 +48,16 @@ class TerminalUI:
     def display_error(self, message):
         """Display an error message"""
         self._display.display_error(message)
+
+    def display_dial_lead(self, lead, remaining=None):
+        """
+        Display a single lead for the dial screen
+
+        Args:
+            lead: Lead dict from get_next_dial_lead
+            remaining: Optional count of dialable leads still in queue
+        """
+        self._display.display_dial_lead(lead, remaining=remaining)
     
     def clear_screen(self):
         """Clear the terminal screen"""
