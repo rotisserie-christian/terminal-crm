@@ -21,6 +21,16 @@ OUTCOME_STATUS_MAP = {
     "closed": "closed",
 }
 
+# Human-readable labels for the dial outcome menu (label, code)
+OUTCOME_MENU_CHOICES = (
+    ("Voicemail", "vm"),
+    ("No answer", "no_answer"),
+    ("Callback", "cb"),
+    ("Not interested", "ni"),
+    ("Wrong number", "wn"),
+    ("Closed / Won", "closed"),
+)
+
 
 def _utcnow() -> str:
     return datetime.now(timezone.utc).isoformat()

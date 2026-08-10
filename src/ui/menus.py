@@ -1,5 +1,7 @@
 import questionary
 
+from src.storage.crm_dial import OUTCOME_MENU_CHOICES
+
 
 class MenuManager:
     """Manages interactive menus"""
@@ -106,6 +108,39 @@ class MenuManager:
             return False
 
         return bool(confirmed)
+
+    def prompt_call_outcome(self):
+        """
+        Prompt for a call outcome and optional description
+
+        Returns:
+            Dict with 'outcome' and 'description', or None if cancelled/back
+        """
+        label_to_code = {label: code for label, code in OUTCOME_MENU_CHOICES}
+        choices = list(label_to_code.keys()) + ["< Back>"]
+
+        choice = self._show_menu("Log call outcome:", choices)
+        if choice is None or choice == "< Back>":
+            return None
+
+        outcome = label_to_code[choice]
+
+        try:
+            description = questionary.text(
+                "Description (optional):",
+                default="",
+                style=self._menu_style,
+            ).ask()
+        except KeyboardInterrupt:
+            return None
+
+        if description is None:
+            return None
+
+        return {
+            "outcome": outcome,
+            "description": description.strip(),
+        }
 
     def show_chat_selection(self, chats):
         """

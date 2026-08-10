@@ -16,4 +16,5 @@ from .crm_dial import (
     log_call_outcome,
     DIALABLE_STATUSES,
     OUTCOME_STATUS_MAP,
+    OUTCOME_MENU_CHOICES,
 )

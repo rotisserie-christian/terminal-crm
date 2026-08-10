@@ -105,6 +105,15 @@ class TerminalUI:
             True if the user confirms the merge, False otherwise
         """
         return self._menus.confirm_lead_import(filenames)
+
+    def prompt_call_outcome(self):
+        """
+        Prompt for a call outcome and optional description
+
+        Returns:
+            Dict with 'outcome' and 'description', or None if cancelled/back
+        """
+        return self._menus.prompt_call_outcome()
     
     def show_chat_selection(self, chats):
         """
