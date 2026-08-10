@@ -11,42 +11,6 @@ from .terminal import (
 )
 
 
-def _plain_dial_lead(lead: dict, remaining=None) -> None:
-    """Print dial lead details without Rich (safe before questionary)."""
-    company = lead.get("company") or "(no company)"
-    phone = lead.get("phone") or "(no phone)"
-    status = lead.get("status") or "new"
-
-    def field(value):
-        text = "" if value is None else str(value).strip()
-        return text if text else "-"
-
-    def flag(value):
-        return "yes" if value else "no"
-
-    lines = [
-        "=== Dial ===",
-        company,
-    ]
-    if remaining is not None:
-        lines.append(f"Queue: {remaining} remaining")
-    lines.extend(
-        [
-            "",
-            f"Phone      {phone}",
-            f"Status     {status}",
-            f"Trade      {field(lead.get('trade'))}",
-            f"Website    {field(lead.get('website'))}",
-            f"Signals    {field(lead.get('signals'))}",
-            f"Hiring     {field(lead.get('hiring'))}",
-            f"Is hiring  {flag(lead.get('is_hiring'))}",
-            f"Has ads    {flag(lead.get('has_ads'))}",
-            "",
-        ]
-    )
-    print_plain("\n".join(lines))
-
-
 class MenuManager:
     """Manages interactive menus"""
 
@@ -252,7 +216,7 @@ class MenuManager:
         """
         Prompt for a call outcome and optional description
 
-        Uses plain dial card + questionary (no Rich before the select menu).
+        Draws the dial lead Panel, then the questionary outcome menu.
 
         Args:
             lead: Lead dict (phone used by Copy number; card redraw)
@@ -270,7 +234,7 @@ class MenuManager:
         while True:
             ansi_clear()
             if lead:
-                _plain_dial_lead(lead, remaining=remaining)
+                self.display.display_dial_lead(lead, remaining=remaining)
 
             choice = self._show_menu("Log call outcome:", choices)
             if choice is None or choice == "< Back>":
@@ -290,8 +254,7 @@ class MenuManager:
 
                 ansi_clear()
                 if lead:
-                    _plain_dial_lead(lead, remaining=remaining)
-                # Brief plain confirmation (no Rich Live before next menu)
+                    self.display.display_dial_lead(lead, remaining=remaining)
                 print_plain(f"✓ Copied  {phone}")
                 import time
 

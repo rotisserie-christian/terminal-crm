@@ -104,7 +104,7 @@ class DialLoop:
                 self._show_empty_queue_and_exit(region=region)
                 return
 
-            # prompt_call_outcome owns the screen (plain dial card + menu)
+            # prompt_call_outcome owns the screen (dial Panel + menu)
             result = self.ui.prompt_call_outcome(lead=lead, remaining=remaining)
             if result is None:
                 self.ui.display_system_message("Returning to menu...")
