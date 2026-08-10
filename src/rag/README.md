@@ -9,18 +9,15 @@
    - Scan `/memory` directory for `.md` and `.txt` files
    - Load embedding cache from disk (`.embeddings_cache.pkl`)
    - For each file:
-     - Check if file is cached and unchanged (timestamp-based)
-     - If cached: load chunks and embeddings from cache (fast!)
-     - If new/changed: chunk text (~800 chars/chunk) and queue for embedding
-   - Generate embeddings only for new/changed files (batch processing)
-   - Update cache with new embeddings
-   - Save cache to disk
-   - Smart chunking respects natural boundaries (paragraphs, lines, sentences, word breaks)
+     - Check if file is cached and unchanged
+     - If cached: load chunks and embeddings (f a s t)
+     - If new/changed: chunk text and queue for embedding
+   - If new/changed: generate embeddings, update cache with new embeddings, save cache to disk
 
 2. **Query-Time Retrieval** (each user message):
    - Generate embedding for user's query
-   - Calculate cosine similarity between query and all chunk embeddings
-   - Select top-k most similar chunks (ranked by relevance)
+   - Calculate cosine similarity between query and all chunk embeddings (bruteforce, but good enough for up to ~1m tokens)
+   - Select top-k most similar chunks
    - Use tokenizer for precise token counting
    - Fit retrieved chunks within RAG token budget (25% of context window)
 
@@ -28,8 +25,3 @@
    - System prompt (always included, ~100-500 tokens)
    - RAG context (retrieved chunks, up to 25% of context window)
    - Chat history (fills remaining ~70%, pruned as needed)
-
-4. **Model Generation**:
-   - Model receives enriched prompt with relevant knowledge base context
-   - Generates informed response using both chat history and RAG context
-   - RAG context is ephemeral (not saved to chat history, re-retrieved each query)
