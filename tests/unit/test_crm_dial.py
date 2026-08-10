@@ -68,18 +68,18 @@ class TestGetNextDialLead:
         assert lead["status"] == "new"
         assert count_dialable_leads(db) == 1
 
-    def test_orders_same_status_by_oldest_created_at(self, tmp_path):
+    def test_orders_same_status_by_oldest_updated_at(self, tmp_path):
         db = CrmDatabase(str(tmp_path / "crm.db"))
         upsert_lead(db, {"company": "First", "phone": "5550101001"})
         upsert_lead(db, {"company": "Second", "phone": "5550101002"})
 
         with db.connect() as conn:
             conn.execute(
-                "UPDATE leads SET created_at = ? WHERE phone = ?",
+                "UPDATE leads SET updated_at = ? WHERE phone = ?",
                 ("2024-01-01T00:00:00+00:00", "5550101001"),
             )
             conn.execute(
-                "UPDATE leads SET created_at = ? WHERE phone = ?",
+                "UPDATE leads SET updated_at = ? WHERE phone = ?",
                 ("2024-06-01T00:00:00+00:00", "5550101002"),
             )
 
