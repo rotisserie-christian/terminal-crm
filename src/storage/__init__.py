@@ -15,7 +15,11 @@ from .crm_dial import (
     count_dialable_leads,
     count_leads,
     log_call_outcome,
+    phone_area_code,
+    area_codes_for_region,
     DIALABLE_STATUSES,
     OUTCOME_STATUS_MAP,
     OUTCOME_MENU_CHOICES,
+    REGION_AREA_CODES,
+    TOLL_FREE_AREA_CODES,
 )
