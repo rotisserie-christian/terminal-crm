@@ -148,7 +148,7 @@ class MenuManager:
         # ANSI clear only — no Rich panel before questionary (avoids stray cursor)
         ansi_clear()
         choice = self._show_menu(
-            "Terminal Chat — Select an option:",
+            "Terminal CRM — Select an option:",
             ["Add Leads", "Dial", "New Chat", "Load Chat", "Settings", "Exit"],
         )
         return choice if choice else "Exit"

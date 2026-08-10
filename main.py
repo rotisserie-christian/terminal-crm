@@ -56,7 +56,7 @@ def main():
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    logger.info("Terminal Chat starting...")
+    logger.info("Terminal CRM starting...")
     
     # Load config
     try:

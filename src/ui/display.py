@@ -26,7 +26,7 @@ class DisplayManager:
         """Welcome box, displays title and portfolio link"""
         self.console.print(
             Panel.fit(
-                f"[bold {config.SECONDARY_COLOR}]Terminal Chat[/bold {config.SECONDARY_COLOR}]\n"
+                f"[bold {config.SECONDARY_COLOR}]Terminal CRM[/bold {config.SECONDARY_COLOR}]\n"
                 f"[dim]christianwaters.dev[/dim]",
                 border_style=config.SECONDARY_COLOR
             )

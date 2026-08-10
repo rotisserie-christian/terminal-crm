@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "terminalchat"
+name = "terminal-crm"
 version = "0.1.0"
-description = "A terminal-based chat interface for local language models"
+description = "A terminal CRM with local LLM chat — import leads, dial, and log outcomes"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -15,11 +15,12 @@ dependencies = [
     "prompt-toolkit",
     "accelerate",
     "questionary",
+    "sentence-transformers",
+    "pyperclip",
 ]
 
 [project.scripts]
-terminalchat = "main:main"
+terminal-crm = "main:main"
 
 [tool.setuptools]
 py-modules = ["main"]
-

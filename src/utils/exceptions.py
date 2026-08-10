@@ -1,5 +1,5 @@
 class TerminalChatError(Exception):
-    """Base exception for all Terminal Chat errors."""
+    """Base exception for all Terminal CRM errors."""
     pass
 
 class ConfigError(TerminalChatError):

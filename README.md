@@ -1,12 +1,12 @@
-# Terminal Chat
+# Terminal CRM
 
-A terminal-based chat interface for local language models. It has rag and save/load features, disabled by default.
+A terminal CRM with local LLM chat. Import JSON leads into SQLite, work a dial queue, and keep optional RAG chat — disabled by default.
 
 ## Installation
 
 Clone the repo:
 ```bash
-git clone https://github.com/rotisserie-christian/terminalchat
+git clone https://github.com/rotisserie-christian/terminal-crm
 ```
 
 
@@ -33,7 +33,7 @@ python main.py
 
 Run with CLI:
 ```bash
-terminalchat 
+terminal-crm
 ```
 
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def setup_logging(
-    log_file: str = "terminalchat.log",
+    log_file: str = "terminal-crm.log",
     level: str = "INFO",
     max_bytes: int = 10 * 1024 * 1024,  # 10 MB
     backup_count: int = 5
