@@ -68,4 +68,6 @@ Per call you can:
 - **New Chat**: start a local LLM conversation
 - **Load Chat**: resume a session from `/chats`
 
+Pick a Hugging Face model ID in **Settings** (default list or enter manually), or set `model_name` in `config.json`.
+
 RAG is off by default. Enable it in **Settings**, then add `.md` / `.txt` files under `/memory` for retrieved context.
