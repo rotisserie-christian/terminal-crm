@@ -34,6 +34,10 @@ class CrmDbError(StorageError):
     """CRM database errors."""
     pass
 
+class LeadLoadError(StorageError):
+    """Failed to load lead JSON files."""
+    pass
+
 class RAGError(TerminalChatError):
     """RAG system errors."""
     pass
