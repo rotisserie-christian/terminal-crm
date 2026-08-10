@@ -64,6 +64,20 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Local CRM database (created at runtime)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Real lead dumps (sample.json is tracked)
+leads/*.json
+!leads/sample.json
+
 # Flask stuff:
 instance/
 .webassets-cache
