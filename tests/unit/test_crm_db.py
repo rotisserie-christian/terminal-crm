@@ -152,3 +152,4 @@ class TestCrmDatabase:
 
         assert row["outcome"] == "vm"
         assert row["description"] == "left voicemail"
+

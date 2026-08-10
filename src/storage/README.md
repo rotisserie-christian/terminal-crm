@@ -2,4 +2,5 @@
 - `manager.py` - Orchestrates chat persistence and directory management
 - `file_io.py` - Pure file operations, validation, and naming logic for chats
 - `crm_db.py` - SQLite CRM database bootstrap (leads + call_outcomes schema)
+- `crm_leads.py` - Phone normalization and lead upsert/merge into SQLite
 
