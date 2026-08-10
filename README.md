@@ -1,78 +1,68 @@
 # Terminal CRM
 
-A terminal CRM with local LLM chat. Import JSON leads into SQLite, work a dial queue, and keep optional RAG chat — disabled by default.
+Terminal-based CRM with a dial queue and optional local LLM chat
 
-## Installation
+## Table of Contents
 
-Clone the repo:
+- [Getting Started](#getting-started)
+- [Adding Leads](#adding-leads)
+- [Tracking Leads](#tracking-leads)
+- [Brainstorming](#brainstorming)
+
+## Getting Started
+
+Python 3.10+.
+
 ```bash
 git clone https://github.com/rotisserie-christian/terminal-crm
-```
-
-
-Install dependencies (Python 3.10+):
-```bash
+cd terminal-crm
 pip install -r requirements.txt
 ```
 
+CLI (optional)
 
-Install CLI:
 ```bash
 pip install -e .
 ```
 
-
-## Usage
-
-Run the main script:
+Run:
 
 ```bash
 python main.py
-```
-
-
-Run with CLI:
-```bash
+# or
 terminal-crm
 ```
 
+Menus use arrow keys and Enter. Exit with `ctrl + c`, or choose Exit from the main menu.
 
-### Main Menu
-- **Add Leads**: Import JSON lead lists from `/leads` into the local CRM database
-- **Dial**: Work the dial queue one lead at a time and log call outcomes
-- **New Chat**: Start a fresh conversation
-- **Load Chat**: Browse and resume a previously saved session
-- **Settings**: Configure the model (HuggingFace ID), display names, and interface colors
-- **Exit**: Close the application
+Settings live in `config.json` (edit the file or use **Settings** in the app).
 
-### Dial outcomes
-When logging a call, choose one of:
-- **Copy number** — copy the lead phone to the clipboard (does not log an outcome)
-- **Voicemail** / **No answer** — stay in queue (`new`)
-- **Callback** — prioritized in the dial queue
-- **Not interested** / **Wrong number** / **Closed / Won** — removed from the dial queue
+## Adding Leads
 
-### Controls
-- **Arrow Keys**: Navigate menus
-- **Enter**: Select an option or send a message
-- **Exit/Quit**: `ctrl + c` or `exit` in the main menu
+1. Put lead JSON files in `/leads`.
+2. Choose **Add Leads** from the main menu to merge them into the local SQLite CRM (`data/`).
 
-## Configuration
+Each lead needs at least a usable `phone`. Import skips invalid or empty numbers and updates existing leads matched by phone.
 
-Settings are stored in `config.json`. You can modify this file directly or use the "Settings" menu option within the application.
+## Tracking Leads
 
-## Project Structure
+Choose **Dial** to work the queue.
 
-- **`main.py`** - Entry point
-- **`src/`** - See `src/README.md`
-- **`src/app/`** - See `src/app/README.md`
-- **`src/rag/`** - See `src/rag/README.md`
-- **`src/settings/`** - See `src/settings/README.md`
-- **`src/ui/`** - See `src/ui/README.md`
-- **`memory/`** - Add files here for RAG (see `memory/README.md`)
-- **`chats/`** - Where chat history is saved (JSON format)
-- **`leads/`** - Drop lead JSON files here for CRM import (see `leads/README.md`)
-- **`data/`** - Local CRM SQLite database (created at runtime)
-- **`prompts/`** - System prompts
-- **`tests/`** - See `tests/README.md`
-- **`config.json`** - Configuration file
+Filter first:
+
+- **Full list**: all dialable leads (`new` or `callback`)
+- **Location**: British Columbia or Ontario only (by phone area code; toll-free excluded)
+
+Per call you can:
+
+- **Copy number**: clipboard only, does not log an outcome
+- **Voicemail** / **No answer**: stay in queue as `new`
+- **Callback**: stay in queue, prioritized next
+- **Not interested** / **Wrong number** / **Closed / Won**: leave the dial queue
+
+## Brainstorming
+
+- **New Chat**: start a local LLM conversation
+- **Load Chat**: resume a session from `/chats`
+
+RAG is off by default. Enable it in **Settings**, then add `.md` / `.txt` files under `/memory` for retrieved context.
