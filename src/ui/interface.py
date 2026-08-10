@@ -70,9 +70,31 @@ class TerminalUI:
         Display the main menu
         
         Returns:
-            str: Selected option ('New Chat', 'Load Chat', 'Settings', or 'Exit')
+            str: Selected option ('Add Leads', 'New Chat', 'Load Chat',
+                 'Settings', or 'Exit')
         """
         return self._menus.show_main_menu()
+
+    def show_lead_import_summary(self, summary):
+        """
+        Display lead import results and wait for acknowledgment
+
+        Args:
+            summary: Import summary dict from import_leads_from_directory
+        """
+        return self._menus.show_lead_import_summary(summary)
+
+    def confirm_lead_import(self, filenames):
+        """
+        Show pending lead JSON filenames and ask to confirm merge
+
+        Args:
+            filenames: List of lead JSON filenames
+
+        Returns:
+            True if the user confirms the merge, False otherwise
+        """
+        return self._menus.confirm_lead_import(filenames)
     
     def show_chat_selection(self, chats):
         """

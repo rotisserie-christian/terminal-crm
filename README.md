@@ -38,6 +38,7 @@ terminalchat
 
 
 ### Main Menu
+- **Add Leads**: Import JSON lead lists from `/leads` into the local CRM database
 - **New Chat**: Start a fresh conversation
 - **Load Chat**: Browse and resume a previously saved session
 - **Settings**: Configure the model (HuggingFace ID), display names, and interface colors
@@ -62,6 +63,8 @@ Settings are stored in `config.json`. You can modify this file directly or use t
 - **`src/ui/`** - See `src/ui/README.md`
 - **`memory/`** - Add files here for RAG (see `memory/README.md`)
 - **`chats/`** - Where chat history is saved (JSON format)
+- **`leads/`** - Drop lead JSON files here for CRM import (see `leads/README.md`)
+- **`data/`** - Local CRM SQLite database (created at runtime)
 - **`prompts/`** - System prompts
 - **`tests/`** - See `tests/README.md`
 - **`config.json`** - Configuration file

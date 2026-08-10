@@ -96,6 +96,48 @@ class DisplayManager:
         """Display a dimmed system message"""
         self.console.print(f"[dim]{message}[/dim]")
 
+    def display_lead_files_pending(self, filenames):
+        """
+        List lead JSON files that will be merged
+
+        Args:
+            filenames: List of filenames in /leads
+        """
+        self.console.print("\n[bold]Lead files ready to merge[/bold]")
+        for name in filenames:
+            self.console.print(f"  [info]•[/info] {name}")
+        self.console.print()
+
+    def display_lead_import_summary(self, summary):
+        """
+        Display results from a lead JSON import
+
+        Args:
+            summary: Dict with added/updated/skipped/files/loaded/errors
+        """
+        self.console.print("\n[bold]Lead import complete[/bold]")
+        self.console.print(
+            f"[info]Files processed:[/info] {summary.get('files', 0)}  "
+            f"[info]Loaded:[/info] {summary.get('loaded', 0)}"
+        )
+        self.console.print(
+            f"[info]Added:[/info] {summary.get('added', 0)}  "
+            f"[info]Updated:[/info] {summary.get('updated', 0)}  "
+            f"[info]Skipped:[/info] {summary.get('skipped', 0)}"
+        )
+
+        errors = summary.get("errors") or []
+        if not summary.get("files") and not errors:
+            self.console.print(
+                "[dim]No JSON files found in /leads. "
+                "Add a lead list (see leads/sample.json) and try again.[/dim]"
+            )
+
+        for err in errors:
+            self.console.print(
+                f"[warning]Skipped file {err.get('file')}: {err.get('error')}[/warning]"
+            )
+
     def display_error(self, message):
         """Display an error message"""
         self.console.print(f"[danger]Error: {message}[/danger]")

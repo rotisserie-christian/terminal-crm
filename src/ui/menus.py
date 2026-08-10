@@ -54,16 +54,58 @@ class MenuManager:
         Display the main menu
         
         Returns:
-            str: Selected option ('New Chat', 'Load Chat', 'Settings', or 'Exit')
+            str: Selected option ('Add Leads', 'New Chat', 'Load Chat',
+                 'Settings', or 'Exit')
         """
         self.display.clear_screen()
         self.display.display_welcome()
         
         choice = self._show_menu(
             "Select an option:",
-            ["New Chat", "Load Chat", "Settings", "Exit"]
+            ["Add Leads", "New Chat", "Load Chat", "Settings", "Exit"]
         )
         return choice if choice else "Exit"
+
+    def show_lead_import_summary(self, summary):
+        """
+        Display lead import results and wait for acknowledgment
+
+        Args:
+            summary: Import summary dict from import_leads_from_directory
+        """
+        self.display.display_lead_import_summary(summary)
+        questionary.press_any_key_to_continue().ask()
+
+    def confirm_lead_import(self, filenames):
+        """
+        Show pending lead JSON filenames and ask to confirm merge
+
+        Args:
+            filenames: List of lead JSON filenames
+
+        Returns:
+            True if the user confirms the merge, False otherwise
+        """
+        if not filenames:
+            self.display.display_system_message(
+                "No JSON files found in /leads. "
+                "Add a lead list (see leads/sample.json) and try again."
+            )
+            questionary.press_any_key_to_continue().ask()
+            return False
+
+        self.display.display_lead_files_pending(filenames)
+
+        try:
+            confirmed = questionary.confirm(
+                f"Merge {len(filenames)} file(s) into the CRM database?",
+                default=True,
+                style=self._menu_style,
+            ).ask()
+        except KeyboardInterrupt:
+            return False
+
+        return bool(confirmed)
 
     def show_chat_selection(self, chats):
         """

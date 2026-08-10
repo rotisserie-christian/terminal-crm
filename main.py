@@ -1,10 +1,15 @@
 import sys
 import logging
-from src.storage import ChatStorage
+from src.storage import (
+    ChatStorage,
+    CrmDatabase,
+    import_leads_from_directory,
+    list_lead_files,
+)
 from src.ui import TerminalUI
 from src.settings import ManageSettings
 import src.config as config
-from src.utils.exceptions import ConfigError
+from src.utils.exceptions import ConfigError, CrmDbError, LeadLoadError
 
 
 logger = logging.getLogger(__name__)
@@ -60,9 +65,10 @@ def main():
         print(f"Configuration error: {e}")
         sys.exit(1)
     
-    # Create UI
+    # Create UI and storage
     ui = TerminalUI()
     storage = ChatStorage()
+    crm_db = CrmDatabase()
     
     # Main menu 
     while True:
@@ -70,6 +76,16 @@ def main():
         
         if choice == "Exit":
             sys.exit(0)
+        
+        elif choice == "Add Leads":
+            try:
+                filenames = [path.name for path in list_lead_files()]
+                if not ui.confirm_lead_import(filenames):
+                    continue
+                summary = import_leads_from_directory(crm_db)
+                ui.show_lead_import_summary(summary)
+            except (CrmDbError, LeadLoadError) as e:
+                ui.display_error(str(e))
         
         elif choice == "Settings":
             ManageSettings(ui.console).run()
