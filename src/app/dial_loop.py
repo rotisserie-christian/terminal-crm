@@ -16,12 +16,18 @@ from src.utils.exceptions import CrmDbError
 
 logger = logging.getLogger(__name__)
 
+_REGION_LABELS = {
+    "bc": "BC",
+    "on": "Ontario",
+}
+
 
 class DialLoop:
     """
     Handles the dial interaction loop
 
     Responsibilities:
+    - Prompt for optional location filter
     - Fetch the next dialable lead
     - Display lead details
     - Prompt for outcome + description
@@ -44,7 +50,7 @@ class DialLoop:
         show_cursor()
         questionary.press_any_key_to_continue().ask()
 
-    def _show_empty_queue_and_exit(self) -> None:
+    def _show_empty_queue_and_exit(self, region=None) -> None:
         """Explain why dial cannot continue, then return to the menu."""
         ansi_clear()
         total = count_leads(self.crm_db)
@@ -54,6 +60,20 @@ class DialLoop:
                 "Use Add Leads to import a JSON list from /leads "
                 "(see leads/sample.json), then choose Dial again."
             )
+        elif region:
+            label = _REGION_LABELS.get(region, region)
+            print_plain(f"No dialable {label} leads right now.")
+            full_count = count_dialable_leads(self.crm_db)
+            if full_count > 0:
+                print_plain(
+                    f"{full_count} dialable lead(s) exist outside this filter. "
+                    "Try Full list, or import more leads for this location."
+                )
+            else:
+                print_plain(
+                    f"{total} lead(s) are in the database, but none have status "
+                    "'new' or 'callback'. Import more leads or wait for callbacks."
+                )
         else:
             print_plain("No dialable leads right now.")
             print_plain(
@@ -67,14 +87,21 @@ class DialLoop:
         """
         Run the dial loop until the queue is empty or the user goes back
         """
+        filter_choice = self.ui.prompt_dial_filter()
+        if filter_choice is None:
+            self.ui.display_system_message("Returning to menu...")
+            return
+
+        region = filter_choice.get("region")
+
         while True:
             ansi_clear()
             with self.ui.status("Loading next lead..."):
-                remaining = count_dialable_leads(self.crm_db)
-                lead = get_next_dial_lead(self.crm_db)
+                remaining = count_dialable_leads(self.crm_db, region=region)
+                lead = get_next_dial_lead(self.crm_db, region=region)
 
             if lead is None:
-                self._show_empty_queue_and_exit()
+                self._show_empty_queue_and_exit(region=region)
                 return
 
             # prompt_call_outcome owns the screen (plain dial card + menu)

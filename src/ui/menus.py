@@ -213,6 +213,41 @@ class MenuManager:
         )
         return bool(confirmed)
 
+    def prompt_dial_filter(self):
+        """
+        Prompt for dial queue scope before starting the dial loop
+
+        Returns:
+            Dict with 'region' ('bc', 'on', or None for full list),
+            or None if cancelled/back
+        """
+        location_labels = {
+            "British Columbia": "bc",
+            "Ontario": "on",
+        }
+
+        while True:
+            ansi_clear()
+            scope = self._show_menu(
+                "Dial filter:",
+                ["Full list", "Location", "< Back>"],
+            )
+            if scope is None or scope == "< Back>":
+                return None
+
+            if scope == "Full list":
+                return {"region": None}
+
+            while True:
+                ansi_clear()
+                place = self._show_menu(
+                    "Location:",
+                    list(location_labels.keys()) + ["< Back>"],
+                )
+                if place is None or place == "< Back>":
+                    break
+                return {"region": location_labels[place]}
+
     def prompt_call_outcome(self, lead=None, remaining=None):
         """
         Prompt for a call outcome and optional description
