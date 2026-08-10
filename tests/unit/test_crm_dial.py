@@ -1,8 +1,11 @@
 from src.storage import (
     CrmDatabase,
+    TOLL_FREE_AREA_CODES,
+    area_codes_for_region,
     count_dialable_leads,
     get_next_dial_lead,
     log_call_outcome,
+    phone_area_code,
     upsert_lead,
 )
 from src.utils.exceptions import CrmDbError
@@ -15,6 +18,120 @@ def _set_status(db, phone, status):
             "UPDATE leads SET status = ? WHERE phone = ?",
             (status, phone),
         )
+
+
+def _seed_region_leads(db):
+    """Insert BC, ON, and toll-free dialable leads for region filter tests."""
+    upsert_lead(db, {"company": "BC Co", "phone": "+1 604-555-0101"})
+    upsert_lead(db, {"company": "ON Co", "phone": "+1 416-555-0102"})
+    upsert_lead(db, {"company": "Toll Free Co", "phone": "+1 888-555-0103"})
+
+
+class TestPhoneAreaCode:
+
+    @pytest.mark.parametrize(
+        "phone,expected",
+        [
+            ("6045550101", "604"),
+            ("16045550101", "604"),
+            ("+1 604-555-0101", "604"),
+            ("4165550102", "416"),
+            ("18885550103", "888"),
+            (None, None),
+            ("", None),
+            ("555", None),
+        ],
+    )
+    def test_extracts_npa(self, phone, expected):
+        assert phone_area_code(phone) == expected
+
+
+class TestAreaCodesForRegion:
+
+    def test_none_and_blank_mean_no_filter(self):
+        assert area_codes_for_region(None) is None
+        assert area_codes_for_region("") is None
+        assert area_codes_for_region("   ") is None
+
+    def test_resolves_bc_and_on(self):
+        bc = area_codes_for_region("bc")
+        on = area_codes_for_region("ON")
+
+        assert bc is not None and "604" in bc and "778" in bc
+        assert on is not None and "416" in on and "647" in on
+        assert bc == tuple(sorted(bc))
+        assert on == tuple(sorted(on))
+
+    def test_excludes_toll_free_from_regions(self):
+        for region in ("bc", "on"):
+            codes = area_codes_for_region(region)
+            assert codes is not None
+            assert TOLL_FREE_AREA_CODES.isdisjoint(codes)
+
+    def test_unknown_region_raises(self):
+        with pytest.raises(ValueError, match="Unknown dial region"):
+            area_codes_for_region("ab")
+
+
+class TestDialRegionFilter:
+
+    def test_full_list_includes_all_numbers(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        _seed_region_leads(db)
+
+        assert count_dialable_leads(db) == 3
+        assert count_dialable_leads(db, region=None) == 3
+
+    def test_bc_filter_returns_only_bc(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        _seed_region_leads(db)
+
+        assert count_dialable_leads(db, region="bc") == 1
+        lead = get_next_dial_lead(db, region="bc")
+        assert lead is not None
+        assert lead["company"] == "BC Co"
+        assert phone_area_code(lead["phone"]) == "604"
+
+    def test_on_filter_returns_only_on(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        _seed_region_leads(db)
+
+        assert count_dialable_leads(db, region="on") == 1
+        lead = get_next_dial_lead(db, region="on")
+        assert lead is not None
+        assert lead["company"] == "ON Co"
+        assert phone_area_code(lead["phone"]) == "416"
+
+    def test_location_filter_excludes_toll_free(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "Toll Free Co", "phone": "18885550103"})
+
+        assert count_dialable_leads(db) == 1
+        assert count_dialable_leads(db, region="bc") == 0
+        assert count_dialable_leads(db, region="on") == 0
+        assert get_next_dial_lead(db, region="bc") is None
+        assert get_next_dial_lead(db, region="on") is None
+
+    def test_region_filter_respects_callback_priority(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "BC New", "phone": "6045550101"})
+        upsert_lead(db, {"company": "BC Callback", "phone": "7785550102"})
+        upsert_lead(db, {"company": "ON Callback", "phone": "4165550103"})
+        _set_status(db, "7785550102", "callback")
+        _set_status(db, "4165550103", "callback")
+
+        lead = get_next_dial_lead(db, region="bc")
+        assert lead["company"] == "BC Callback"
+        assert count_dialable_leads(db, region="bc") == 2
+
+    def test_unknown_region_raises_on_dial_helpers(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "BC Co", "phone": "6045550101"})
+
+        with pytest.raises(ValueError, match="Unknown dial region"):
+            get_next_dial_lead(db, region="qc")
+        with pytest.raises(ValueError, match="Unknown dial region"):
+            count_dialable_leads(db, region="qc")
 
 
 class TestGetNextDialLead:
