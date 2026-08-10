@@ -39,10 +39,18 @@ terminalchat
 
 ### Main Menu
 - **Add Leads**: Import JSON lead lists from `/leads` into the local CRM database
+- **Dial**: Work the dial queue one lead at a time and log call outcomes
 - **New Chat**: Start a fresh conversation
 - **Load Chat**: Browse and resume a previously saved session
 - **Settings**: Configure the model (HuggingFace ID), display names, and interface colors
 - **Exit**: Close the application
+
+### Dial outcomes
+When logging a call, choose one of:
+- **Copy number** — copy the lead phone to the clipboard (does not log an outcome)
+- **Voicemail** / **No answer** — stay in queue (`new`)
+- **Callback** — prioritized in the dial queue
+- **Not interested** / **Wrong number** / **Closed / Won** — removed from the dial queue
 
 ### Controls
 - **Arrow Keys**: Navigate menus

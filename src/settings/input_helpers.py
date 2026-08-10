@@ -4,6 +4,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.styles import Style as PtStyle
 import src.config as config
+from src.ui.terminal import show_cursor, sync_after_rich
 
 
 def get_text_input(console, label: str, default: str) -> str | None:
@@ -33,6 +34,8 @@ def get_text_input(console, label: str, default: str) -> str | None:
     try:
         console.print(f"\n[yellow]{label}[/yellow]")
         console.print(f"[dim]Current: {default} (Press Esc to go back)[/dim]")
+        sync_after_rich(console)
+        show_cursor()
         
         result = session.prompt(f"> ", default=default)
         return result
@@ -71,6 +74,8 @@ def get_float_input(console, label: str, current: float, min_val: float, max_val
         try:
             console.print(f"\n[yellow]{label}[/yellow]")
             console.print(f"[dim]Current: {current} | Range: {min_val}-{max_val} (Press Esc to go back)[/dim]")
+            sync_after_rich(console)
+            show_cursor()
             
             result = session.prompt(f"> ", default=str(current))
             
@@ -125,6 +130,8 @@ def get_int_input(console, label: str, current: int, min_val: int, max_val: int)
         try:
             console.print(f"\n[yellow]{label}[/yellow]")
             console.print(f"[dim]Current: {current} | Range: {min_val}-{max_val} (Press Esc to go back)[/dim]")
+            sync_after_rich(console)
+            show_cursor()
             
             result = session.prompt(f"> ", default=str(current))
             

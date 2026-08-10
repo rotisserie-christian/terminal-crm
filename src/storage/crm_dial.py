@@ -135,6 +135,21 @@ def count_dialable_leads(
     return int(row["n"])
 
 
+def count_leads(db: CrmDatabase) -> int:
+    """
+    Count all leads in the CRM database
+
+    Args:
+        db: CRM database instance
+
+    Returns:
+        Total number of leads
+    """
+    with db.connect() as conn:
+        row = conn.execute("SELECT COUNT(*) AS n FROM leads").fetchone()
+    return int(row["n"])
+
+
 def log_call_outcome(
     db: CrmDatabase,
     lead_id: int,

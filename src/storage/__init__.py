@@ -13,6 +13,7 @@ from .crm_import import import_leads_from_directory
 from .crm_dial import (
     get_next_dial_lead,
     count_dialable_leads,
+    count_leads,
     log_call_outcome,
     DIALABLE_STATUSES,
     OUTCOME_STATUS_MAP,

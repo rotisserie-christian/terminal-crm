@@ -86,6 +86,15 @@ def main():
                 ui.show_lead_import_summary(summary)
             except (CrmDbError, LeadLoadError) as e:
                 ui.display_error(str(e))
+
+        elif choice == "Dial":
+            from src.ui.terminal import ansi_clear
+            ansi_clear()
+            with ui.status("Loading dialer..."):
+                # Import dial_loop directly to avoid loading the model stack
+                from src.app.dial_loop import DialLoop
+                dial_loop = DialLoop(ui, crm_db)
+            dial_loop.run()
         
         elif choice == "Settings":
             ManageSettings(ui.console).run()

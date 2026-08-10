@@ -1,6 +1,8 @@
 import sys
 import shutil
+import time
 from rich.console import Console
+from rich.live import Live
 from rich.panel import Panel
 from rich.theme import Theme
 import src.config as config
@@ -183,6 +185,23 @@ class DisplayManager:
             )
         )
 
+    def display_copied_flash(self, phone: str, duration: float = 0.75):
+        """
+        Briefly show a transient "Copied" confirmation
+
+        Args:
+            phone: Phone number that was copied
+            duration: Seconds to keep the status visible
+        """
+        message = f"[bold green]✓ Copied[/bold green]  [dim]{phone}[/dim]"
+        with Live(
+            message,
+            console=self.console,
+            transient=True,
+            refresh_per_second=8,
+        ):
+            time.sleep(duration)
+
     def display_error(self, message):
         """Display an error message"""
         self.console.print(f"[danger]Error: {message}[/danger]")
@@ -190,3 +209,12 @@ class DisplayManager:
     def clear_screen(self):
         """Clear the terminal screen"""
         self.console.clear()
+
+    def status(self, message: str):
+        """
+        Rich status spinner context manager for loading feedback
+
+        Args:
+            message: Status text to show beside the spinner
+        """
+        return self.console.status(f"[cyan]{message}[/cyan]", spinner="dots")

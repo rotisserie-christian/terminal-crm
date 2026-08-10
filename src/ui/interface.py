@@ -62,6 +62,15 @@ class TerminalUI:
     def clear_screen(self):
         """Clear the terminal screen"""
         self._display.clear_screen()
+
+    def status(self, message: str):
+        """
+        Rich status spinner context manager for loading feedback
+
+        Args:
+            message: Status text to show beside the spinner
+        """
+        return self._display.status(message)
     
     # Input methods
     def get_input(self):
@@ -80,7 +89,7 @@ class TerminalUI:
         Display the main menu
         
         Returns:
-            str: Selected option ('Add Leads', 'New Chat', 'Load Chat',
+            str: Selected option ('Add Leads', 'Dial', 'New Chat', 'Load Chat',
                  'Settings', or 'Exit')
         """
         return self._menus.show_main_menu()
@@ -106,14 +115,18 @@ class TerminalUI:
         """
         return self._menus.confirm_lead_import(filenames)
 
-    def prompt_call_outcome(self):
+    def prompt_call_outcome(self, lead=None, remaining=None):
         """
         Prompt for a call outcome and optional description
+
+        Args:
+            lead: Lead dict (phone used by Copy number; card redraw)
+            remaining: Optional dialable queue count for the card header
 
         Returns:
             Dict with 'outcome' and 'description', or None if cancelled/back
         """
-        return self._menus.prompt_call_outcome()
+        return self._menus.prompt_call_outcome(lead=lead, remaining=remaining)
     
     def show_chat_selection(self, chats):
         """
