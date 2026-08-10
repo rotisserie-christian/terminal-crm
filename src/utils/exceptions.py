@@ -30,6 +30,10 @@ class ChatSaveError(StorageError):
     """Failed to save chat history."""
     pass
 
+class CrmDbError(StorageError):
+    """CRM database errors."""
+    pass
+
 class RAGError(TerminalChatError):
     """RAG system errors."""
     pass
