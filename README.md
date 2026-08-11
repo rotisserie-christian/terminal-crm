@@ -3,7 +3,7 @@
 Terminal-based CRM with a dial queue and optional local LLM chat
 
 > [!NOTE]  
-> This is not an auto-dialer or a spam script. It's for working small lead lists and brainstorming in the privacy of your own hardware. 
+> This is not an auto-dialer or a spam script. It's for manually working small lists and brainstorming in the privacy of your own hardware. 
 
 ## Table of Contents
 
