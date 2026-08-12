@@ -54,7 +54,7 @@ Choose **Dial** to work the queue.
 Filter first:
 
 - **Full list**: all dialable leads (`new` or `callback`)
-- **Location**: British Columbia or Ontario only (by phone area code; toll-free excluded)
+- **Location**: By phone area code, toll-free numbers are excluded since they are crap 99/100 times
 
 Per call you can:
 
