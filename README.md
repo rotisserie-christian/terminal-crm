@@ -45,7 +45,41 @@ Settings live in `config.json` (edit the file or use **Settings** in the app).
 1. Put lead JSON files in `/leads`.
 2. Choose **Add Leads** from the main menu to merge them into the local SQLite CRM (`data/`).
 
-Each lead needs at least a usable `phone`. Import skips invalid or empty numbers and updates existing leads matched by phone.
+Each lead needs at least a usable `phone`. Import skips invalid or empty numbers and updates existing leads matched by phone. `status`, `created_at`, and `updated_at` are set by the CRM (new imports start as `new`).
+
+### Lead list JSON
+
+A file may be a top-level array, or an object with a `leads` array:
+
+```json
+[
+  {
+    "company": "Serious Business Inc.",
+    "website": "https://serious.biz",
+    "trade": "roofing",
+    "signals": "No tap-to-call in hero; long contact form",
+    "hiring": "",
+    "phone": "+1 604-123-1234",
+    "is_hiring": false,
+    "has_ads": true
+  }
+]
+```
+
+```json
+{ "leads": [ { "company": "Serious Business Inc.", "phone": "3061231234" } ] }
+```
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `phone` | yes | Any format; stored as digits only. Duplicate phones update the existing row. |
+| `company` | no | Display name |
+| `website` | no | URL |
+| `trade` | no | What industry/type of business they do |
+| `signals` | no | Whatever indicates they might be interested |
+| `hiring` | no | Notes on what they're hiring for, if they're hiring |
+| `is_hiring` | no | Boolean: `true`/`false`, `1`/`0`, `yes`/`no` (default `0`) |
+| `has_ads` | no | Boolean |
 
 ## Tracking Leads
 
