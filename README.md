@@ -8,9 +8,12 @@ Terminal-based CRM with a dial queue and optional local LLM chat
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Adding Leads](#adding-leads)
-- [Tracking Leads](#tracking-leads)
+- [CRM](#crm)
+  - [Adding Leads](#adding-leads)
+  - [Tracking Leads](#tracking-leads)
 - [Brainstorming](#brainstorming)
+  - [Custom Materials](#custom-materials)
+  - [Chat History](#chat-history)
 
 ## Getting Started
 
@@ -40,14 +43,16 @@ Menus use arrow keys and Enter. Exit with `ctrl + c`, or choose Exit from the ma
 
 Settings live in `config.json` (edit the file or use **Settings** in the app).
 
-## Adding Leads
+## CRM
+
+### Adding Leads
 
 1. Put lead JSON files in `/leads`.
 2. Choose **Add Leads** from the main menu to merge them into the local SQLite CRM (`data/`).
 
 Each lead needs at least a usable `phone`. Import skips invalid or empty numbers and updates existing leads matched by phone. `status`, `created_at`, and `updated_at` are set by the CRM (new imports start as `new`).
 
-### Lead list JSON
+#### Lead list JSON
 
 A file may be a top-level array, or an object with a `leads` array:
 
@@ -81,7 +86,7 @@ A file may be a top-level array, or an object with a `leads` array:
 | `is_hiring` | no | Boolean: `true`/`false`, `1`/`0`, `yes`/`no` (default `0`) |
 | `has_ads` | no | Boolean |
 
-## Tracking Leads
+### Tracking Leads
 
 Choose **Dial** to work the queue.
 
@@ -104,4 +109,21 @@ Per call you can:
 
 Pick a Hugging Face model ID in **Settings** (default list or enter manually), or set `model_name` in `config.json`.
 
-RAG is off by default. Enable it in **Settings**, then add `.md` / `.txt` files under `/memory` for retrieved context.
+> [!NOTE]  
+> This will download the model to run on your machine, make sure you can run it
+
+Each prompt is built in three layers: system prompt, optional RAG from `/memory`, then chat history. RAG is off by default; enable it in **Settings**.
+
+### Custom Materials
+
+Drop `.md` / `.txt` files in `/memory`. Those are the knowledge base RAG searches.
+
+When RAG is on, each user message is compared to chunks from those files. The most relevant chunks are injected after the system prompt, up to the RAG token budget (default 25% of the context window; Top-K and percentage are in **Settings**). Unchanged files reuse a local embeddings cache.
+
+There are some penguin facts in `/memory` by default.
+
+### Chat History
+
+Sessions save as JSON under `/chats`. **Load Chat** restores that transcript so you can continue.
+
+Chat history is not part of the RAG index. After the system prompt (and any retrieved `/memory` chunks), remaining context is filled with the conversation. Oldest messages are dropped first if the window is full; the latest user message is kept.
