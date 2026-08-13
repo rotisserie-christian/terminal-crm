@@ -3,7 +3,7 @@
 Terminal-based CRM with a dial queue and optional local LLM chat
 
 > [!NOTE]  
-> This is not an auto-dialer or a spam script. It's for working small lead lists and brainstorming in the privacy of your own hardware. 
+> This is not an auto-dialer or a spam script. It's for manually working small lists and brainstorming in the privacy of your own hardware. 
 
 ## Table of Contents
 
@@ -88,7 +88,7 @@ Choose **Dial** to work the queue.
 Filter first:
 
 - **Full list**: all dialable leads (`new` or `callback`)
-- **Location**: British Columbia or Ontario only (by phone area code; toll-free excluded)
+- **Location**: By phone area code, toll-free numbers are excluded since they are crap 99/100 times
 
 Per call you can:
 
