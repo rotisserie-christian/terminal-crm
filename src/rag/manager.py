@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 MEMORY_DIR = "memory"
 SUPPORTED_EXTENSIONS = {'.md', '.txt'}
 EXCLUDED_FILES = {'README.md', 'readme.md', 'README.txt', 'readme.txt'}
+RELATIVE_SIMILARITY_MARGIN = 0.1
 
 
 class RAGManager:
@@ -145,8 +146,21 @@ class RAGManager:
         
         return True
     
-    def retrieve(self, query: str, tokenizer, max_tokens: int, top_k: int = 10) -> Tuple[str, int]:
-        """Retrieve relevant chunks for a query"""
+    def retrieve(
+        self,
+        query: str,
+        tokenizer,
+        max_tokens: int,
+        top_k: int = 10,
+        min_similarity: float = 0.4,
+        relative_margin: float = RELATIVE_SIMILARITY_MARGIN,
+    ) -> Tuple[str, int]:
+        """Retrieve relevant chunks for a query.
+
+        Drops chunks below min_similarity. If the best match is below
+        that cutoff, returns empty so no RAG budget is spent. Also keeps
+        only chunks within relative_margin of the best score.
+        """
         if not self._loaded or not self.chunks:
             logger.debug("No RAG context loaded, returning empty")
             return "", 0
@@ -155,11 +169,25 @@ class RAGManager:
             query_embedding = self.embedding_model.encode_single(query)
             similarities = cosine_similarity(query_embedding, self.embeddings)
             top_indices = np.argsort(similarities)[-top_k:][::-1]
+            best_similarity = float(similarities[top_indices[0]])
+
+            if best_similarity < min_similarity:
+                logger.info(
+                    f"Skipping RAG: best similarity {best_similarity:.3f} "
+                    f"below cutoff {min_similarity:.3f}"
+                )
+                return "", 0
+
+            floor = max(min_similarity, best_similarity - relative_margin)
             
             selected_chunks = []
             total_tokens = 0
             
             for idx in top_indices:
+                similarity = float(similarities[idx])
+                if similarity < floor:
+                    break
+
                 chunk = self.chunks[idx]
                 chunk_tokens = len(tokenizer.encode(chunk))
                 
@@ -172,7 +200,7 @@ class RAGManager:
                 total_tokens += chunk_tokens
                 
                 logger.debug(f"Retrieved chunk from {self.chunk_metadata[idx]['filename']} "
-                           f"(similarity: {similarities[idx]:.3f}, tokens: {chunk_tokens})")
+                           f"(similarity: {similarity:.3f}, tokens: {chunk_tokens})")
             
             context = "\n\n".join(selected_chunks)
             logger.info(f"Retrieved {len(selected_chunks)} chunks ({total_tokens} tokens) for query")

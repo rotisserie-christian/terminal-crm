@@ -47,6 +47,7 @@ class RAGSettingsMenu:
                     "Enable/Disable RAG",
                     "Context Percentage",
                     "Top-K Retrieval",
+                    "Relevance Cutoff",
                     "Back",
                 ],
                 style,
@@ -87,6 +88,19 @@ class RAGSettingsMenu:
                 if new_top_k is not None:
                     config.RAG_TOP_K = new_top_k
 
+            elif choice == "Relevance Cutoff":
+                sync_after_rich(self.console)
+                show_cursor()
+                new_cutoff = get_float_input(
+                    self.console,
+                    "Relevance cutoff (0.0-1.0 cosine; skip RAG if nothing is this similar)",
+                    config.RAG_RELEVANCE_CUTOFF,
+                    0.0,
+                    1.0,
+                )
+                if new_cutoff is not None:
+                    config.RAG_RELEVANCE_CUTOFF = new_cutoff
+
     def _toggle_rag(self, style):
         """Handle RAG enable/disable toggle."""
         ansi_clear()
@@ -114,9 +128,14 @@ class RAGSettingsMenu:
         print_plain(f"Status: {rag_status}")
         print_plain(f"Context Percentage: {percentage_display}")
         print_plain(f"Top-K Retrieval: {config.RAG_TOP_K}")
+        print_plain(f"Relevance Cutoff: {config.RAG_RELEVANCE_CUTOFF}")
         print_plain("")
         print_plain(
             "RAG uses files from the /memory directory to provide "
             "context-aware responses based on your knowledge base."
+        )
+        print_plain(
+            "Chunks below the relevance cutoff are ignored. If nothing "
+            "is similar enough, RAG is skipped for that message."
         )
         print_plain("")

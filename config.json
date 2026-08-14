@@ -11,5 +11,6 @@
   "autosave_enabled": false,
   "rag_enabled": false,
   "rag_context_percentage": 0.25,
-  "rag_top_k": 10
+  "rag_top_k": 10,
+  "rag_relevance_cutoff": 0.4
 }

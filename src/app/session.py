@@ -57,7 +57,8 @@ class ChatSession:
                 query=query,
                 tokenizer=self.model_handler.tokenizer,
                 max_tokens=self.rag_token_budget,
-                top_k=config.RAG_TOP_K
+                top_k=config.RAG_TOP_K,
+                min_similarity=config.RAG_RELEVANCE_CUTOFF,
             )
             
             if tokens > 0:

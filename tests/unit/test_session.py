@@ -50,7 +50,8 @@ class TestChatSession:
             query="query",
             tokenizer=mock_model_handler.tokenizer,
             max_tokens=chat_session.rag_token_budget,
-            top_k=config.RAG_TOP_K
+            top_k=config.RAG_TOP_K,
+            min_similarity=config.RAG_RELEVANCE_CUTOFF,
         )
 
     def test_get_rag_context_not_loaded(self, chat_session, mock_rag_manager):

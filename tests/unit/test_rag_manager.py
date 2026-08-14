@@ -78,10 +78,75 @@ class TestRAGManager:
         mock_tokenizer.encode.side_effect = lambda x: [1] * len(x) # Simplified tokenization
         
         # Should retrieve both because we have enough max_tokens
-        context, tokens = manager.retrieve("query", mock_tokenizer, max_tokens=100)
+        context, tokens = manager.retrieve(
+            "query",
+            mock_tokenizer,
+            max_tokens=100,
+            min_similarity=0.0,
+            relative_margin=1.0,
+        )
         assert "chunk1" in context
         assert "chunk2" in context
         assert tokens == len("chunk1") + len("chunk2")
+
+    @patch('src.rag.manager.EmbeddingModel')
+    @patch('src.rag.manager.EmbeddingsCache')
+    def test_retrieve_skips_when_below_cutoff(self, MockCache, MockModel):
+        manager = RAGManager()
+        manager._loaded = True
+        manager.chunks = ["unrelated"]
+        manager.embeddings = np.array([[0.0, 1.0]], dtype=np.float32)
+        manager.chunk_metadata = [{"filename": "f1"}]
+
+        MockModel.return_value.encode_single.return_value = np.array(
+            [1.0, 0.0], dtype=np.float32
+        )
+        mock_tokenizer = MagicMock()
+        mock_tokenizer.encode.side_effect = lambda x: [1] * len(x)
+
+        context, tokens = manager.retrieve(
+            "query", mock_tokenizer, max_tokens=100, min_similarity=0.4
+        )
+        assert context == ""
+        assert tokens == 0
+
+    @patch('src.rag.manager.EmbeddingModel')
+    @patch('src.rag.manager.EmbeddingsCache')
+    def test_retrieve_drops_weaker_than_relative_margin(self, MockCache, MockModel):
+        manager = RAGManager()
+        manager._loaded = True
+        manager.chunks = ["best", "close", "far"]
+        manager.embeddings = np.array(
+            [
+                [1.0, 0.0],
+                [0.95, 0.3122499],
+                [0.5, 0.8660254],
+            ],
+            dtype=np.float32,
+        )
+        manager.chunk_metadata = [
+            {"filename": "f1"},
+            {"filename": "f2"},
+            {"filename": "f3"},
+        ]
+
+        MockModel.return_value.encode_single.return_value = np.array(
+            [1.0, 0.0], dtype=np.float32
+        )
+        mock_tokenizer = MagicMock()
+        mock_tokenizer.encode.side_effect = lambda x: [1] * len(x)
+
+        context, tokens = manager.retrieve(
+            "query",
+            mock_tokenizer,
+            max_tokens=100,
+            min_similarity=0.4,
+            relative_margin=0.1,
+        )
+        assert "best" in context
+        assert "close" in context
+        assert "far" not in context
+        assert tokens == len("best") + len("close")
 
     def test_get_stats(self):
         manager = RAGManager()

@@ -35,6 +35,7 @@ AUTOSAVE_ENABLED = DEFAULT_AUTOSAVE_ENABLED
 RAG_ENABLED = DEFAULT_RAG_ENABLED
 RAG_CONTEXT_PERCENTAGE = DEFAULT_RAG_CONTEXT_PERCENTAGE
 RAG_TOP_K = DEFAULT_RAG_TOP_K
+RAG_RELEVANCE_CUTOFF = DEFAULT_RAG_RELEVANCE_CUTOFF
 
 
 def load_config(config_path: Optional[Path] = None) -> bool:
@@ -54,7 +55,7 @@ def load_config(config_path: Optional[Path] = None) -> bool:
     global MODEL_NAME, TEMPERATURE, TOP_K, TOP_P, MAX_NEW_TOKENS
     global USER_DISPLAY_NAME, MODEL_DISPLAY_NAME
     global PRIMARY_COLOR, SECONDARY_COLOR, AUTOSAVE_ENABLED
-    global RAG_ENABLED, RAG_CONTEXT_PERCENTAGE, RAG_TOP_K
+    global RAG_ENABLED, RAG_CONTEXT_PERCENTAGE, RAG_TOP_K, RAG_RELEVANCE_CUTOFF
 
     path = Path(config_path) if config_path else Path(CONFIG_FILE)
     
@@ -106,6 +107,9 @@ def load_config(config_path: Optional[Path] = None) -> bool:
     RAG_ENABLED = config.get("rag_enabled", DEFAULT_RAG_ENABLED)
     RAG_CONTEXT_PERCENTAGE = config.get("rag_context_percentage", DEFAULT_RAG_CONTEXT_PERCENTAGE)
     RAG_TOP_K = config.get("rag_top_k", DEFAULT_RAG_TOP_K)
+    RAG_RELEVANCE_CUTOFF = config.get(
+        "rag_relevance_cutoff", DEFAULT_RAG_RELEVANCE_CUTOFF
+    )
     
     logger.info(f"Config loaded successfully from {path}")
     return True
@@ -137,7 +141,8 @@ def save_config(config_path: Optional[Path] = None) -> None:
         "autosave_enabled": AUTOSAVE_ENABLED,
         "rag_enabled": RAG_ENABLED,
         "rag_context_percentage": RAG_CONTEXT_PERCENTAGE,
-        "rag_top_k": RAG_TOP_K
+        "rag_top_k": RAG_TOP_K,
+        "rag_relevance_cutoff": RAG_RELEVANCE_CUTOFF,
     }
     
     try:
@@ -159,7 +164,7 @@ def reset_to_defaults() -> None:
     global MODEL_NAME, TEMPERATURE, TOP_K, TOP_P, MAX_NEW_TOKENS
     global USER_DISPLAY_NAME, MODEL_DISPLAY_NAME
     global PRIMARY_COLOR, SECONDARY_COLOR, AUTOSAVE_ENABLED
-    global RAG_ENABLED, RAG_CONTEXT_PERCENTAGE, RAG_TOP_K
+    global RAG_ENABLED, RAG_CONTEXT_PERCENTAGE, RAG_TOP_K, RAG_RELEVANCE_CUTOFF
     
     MODEL_NAME = DEFAULT_MODEL_NAME
     TEMPERATURE = DEFAULT_TEMPERATURE
@@ -174,3 +179,4 @@ def reset_to_defaults() -> None:
     RAG_ENABLED = DEFAULT_RAG_ENABLED
     RAG_CONTEXT_PERCENTAGE = DEFAULT_RAG_CONTEXT_PERCENTAGE
     RAG_TOP_K = DEFAULT_RAG_TOP_K
+    RAG_RELEVANCE_CUTOFF = DEFAULT_RAG_RELEVANCE_CUTOFF

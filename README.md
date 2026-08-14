@@ -118,9 +118,9 @@ Each prompt is built in three layers: system prompt, optional RAG from `/memory`
 
 Drop `.md` / `.txt` files in `/memory`. Those are the knowledge base RAG searches.
 
-When RAG is on, each user message is compared to chunks from those files. The most relevant chunks are injected after the system prompt, up to the RAG token budget (default 25% of the context window; Top-K and percentage are in **Settings**). Unchanged files reuse a local embeddings cache.
+When RAG is on, each user message is compared to chunks from those files. Chunks below the relevance cutoff are ignored, and weaker matches more than `0.1` below the best hit are dropped too. If nothing is similar enough, RAG is skipped for that message so the token budget stays with chat history. Otherwise the remaining hits are injected after the system prompt, up to the RAG token budget (default 25% of the context window. Top-K, percentage, and cutoff are in **Settings**). Unchanged files reuse a local embeddings cache.
 
-There are some penguin facts in `/memory` by default.
+There are some penguin facts in `/memory` by default, play around with that if you want to tweak it. 
 
 ### Chat History
 

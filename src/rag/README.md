@@ -18,8 +18,10 @@
    - Generate embedding for user's query
    - Calculate cosine similarity between query and all chunk embeddings (bruteforce, but good enough for up to ~1m tokens)
    - Select top-k most similar chunks
+   - Skip RAG entirely if the best cosine score is below `rag_relevance_cutoff`
+   - Keep only chunks within 0.1 of the best score (and still above the cutoff)
    - Use tokenizer for precise token counting
-   - Fit retrieved chunks within RAG token budget (25% of context window)
+   - Fit remaining chunks within RAG token budget (25% of context window)
 
 3. **Prompt Construction** (in `context_manager.py`):
    - System prompt (always included, ~100-500 tokens)
