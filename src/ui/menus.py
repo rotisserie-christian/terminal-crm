@@ -146,6 +146,24 @@ class MenuManager:
         print_plain("")
         self._press_any_key()
 
+    def show_analytics(self, lead_stats, outcome_stats, scope_label="Full list"):
+        """
+        Display analytics and wait for acknowledgment
+
+        Args:
+            lead_stats: Dict from lead_status_counts
+            outcome_stats: Dict from outcome_counts
+            scope_label: Panel subtitle (e.g. 'BC', 'Full list')
+        """
+        ansi_clear()
+        self.display.display_analytics(
+            lead_stats,
+            outcome_stats,
+            scope_label=scope_label,
+        )
+        print_plain("")
+        self._press_any_key()
+
     def confirm_lead_import(self, filenames):
         """
         Show pending lead JSON filenames and ask to confirm merge

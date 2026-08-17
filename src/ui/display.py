@@ -1,11 +1,13 @@
 import sys
 import shutil
 import time
-from rich.console import Console
+from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
+from rich.table import Table
 from rich.theme import Theme
 import src.config as config
+from src.storage import LEAD_STATUSES, OUTCOME_MENU_CHOICES, ratio_bar
 
 
 class DisplayManager:
@@ -181,6 +183,77 @@ class DisplayManager:
             Panel(
                 f"{header}\n\n{body}",
                 title="Dial",
+                border_style=config.SECONDARY_COLOR,
+            )
+        )
+
+    def _analytics_table(self, title, rows, total):
+        table = Table(
+            title=title,
+            show_header=True,
+            header_style="bold",
+            box=None,
+            pad_edge=False,
+            expand=False,
+        )
+        table.add_column(" ", style="bold")
+        table.add_column("n", justify="right")
+        table.add_column("%", justify="right", style="dim")
+        table.add_column(" ", no_wrap=True)
+
+        for label, count in rows:
+            if total <= 0:
+                pct = "0%"
+            else:
+                pct = f"{round(100 * count / total)}%"
+            bar = ratio_bar(count, total)
+            table.add_row(label, str(count), pct, f"[dim]{bar}[/dim]")
+        return table
+
+    def display_analytics(self, lead_stats, outcome_stats, scope_label="Full list"):
+        """
+        Display lead and call outcome counts for a filter scope
+
+        Args:
+            lead_stats: Dict from lead_status_counts
+            outcome_stats: Dict from outcome_counts
+            scope_label: Panel subtitle (e.g. 'BC', 'Full list')
+        """
+        status_labels = {
+            "new": "New",
+            "callback": "Callback",
+            "not_interested": "Not interested",
+            "do_not_call": "Do not call",
+            "wrong_number": "Wrong number",
+            "closed": "Closed / Won",
+        }
+        outcome_labels = {code: label for label, code in OUTCOME_MENU_CHOICES}
+
+        by_status = lead_stats.get("by_status") or {}
+        lead_total = int(lead_stats.get("total") or 0)
+        lead_rows = [("In queue", int(lead_stats.get("queue") or 0))]
+        for status in LEAD_STATUSES:
+            lead_rows.append(
+                (status_labels.get(status, status), int(by_status.get(status, 0)))
+            )
+
+        by_outcome = outcome_stats.get("by_outcome") or {}
+        outcome_total = int(outcome_stats.get("total") or 0)
+        outcome_rows = [
+            (outcome_labels.get(code, code), int(by_outcome.get(code, 0)))
+            for _, code in OUTCOME_MENU_CHOICES
+        ]
+
+        body = Group(
+            self._analytics_table("Leads", lead_rows, lead_total),
+            self._analytics_table("Calls", outcome_rows, outcome_total),
+        )
+
+        self.console.print()
+        self.console.print(
+            Panel(
+                body,
+                title=f"Analytics — {scope_label}",
                 border_style=config.SECONDARY_COLOR,
             )
         )

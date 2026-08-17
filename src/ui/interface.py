@@ -58,6 +58,21 @@ class TerminalUI:
             remaining: Optional count of dialable leads still in queue
         """
         self._display.display_dial_lead(lead, remaining=remaining)
+
+    def display_analytics(self, lead_stats, outcome_stats, scope_label="Full list"):
+        """
+        Display lead and call outcome counts for a filter scope
+
+        Args:
+            lead_stats: Dict from lead_status_counts
+            outcome_stats: Dict from outcome_counts
+            scope_label: Panel subtitle (e.g. 'BC', 'Full list')
+        """
+        self._display.display_analytics(
+            lead_stats,
+            outcome_stats,
+            scope_label=scope_label,
+        )
     
     def clear_screen(self):
         """Clear the terminal screen"""
@@ -102,6 +117,21 @@ class TerminalUI:
             summary: Import summary dict from import_leads_from_directory
         """
         return self._menus.show_lead_import_summary(summary)
+
+    def show_analytics(self, lead_stats, outcome_stats, scope_label="Full list"):
+        """
+        Display analytics and wait for acknowledgment
+
+        Args:
+            lead_stats: Dict from lead_status_counts
+            outcome_stats: Dict from outcome_counts
+            scope_label: Panel subtitle (e.g. 'BC', 'Full list')
+        """
+        return self._menus.show_analytics(
+            lead_stats,
+            outcome_stats,
+            scope_label=scope_label,
+        )
 
     def confirm_lead_import(self, filenames):
         """
