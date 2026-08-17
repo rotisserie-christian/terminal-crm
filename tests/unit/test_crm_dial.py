@@ -427,6 +427,7 @@ class TestLogCallOutcome:
             ("no_answer", "new"),
             ("cb", "callback"),
             ("ni", "not_interested"),
+            ("dnc", "do_not_call"),
             ("wn", "wrong_number"),
             ("closed", "closed"),
             ("VM", "new"),
@@ -487,3 +488,25 @@ class TestLogCallOutcome:
         assert count_dialable_leads(db) == 1
         next_lead = get_next_dial_lead(db)
         assert next_lead["company"] != lead["company"]
+
+    def test_dnc_removes_lead_from_dial_queue_but_keeps_row(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "Acme Roofing", "phone": "5550101001"})
+        upsert_lead(db, {"company": "Blue Sky HVAC", "phone": "5550101002"})
+
+        lead = get_next_dial_lead(db)
+        log_call_outcome(db, lead["id"], "dnc", "asked not to be called")
+
+        assert count_dialable_leads(db) == 1
+        assert [row["company"] for row in list_dialable_leads(db)] == [
+            "Blue Sky HVAC"
+        ]
+
+        with db.connect() as conn:
+            row = conn.execute(
+                "SELECT company, status FROM leads WHERE id = ?",
+                (lead["id"],),
+            ).fetchone()
+
+        assert row["company"] == lead["company"]
+        assert row["status"] == "do_not_call"
