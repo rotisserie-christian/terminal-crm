@@ -95,12 +95,14 @@ Filter first:
 - **Full list**: all dialable leads (`new` or `callback`)
 - **Location**: By phone area code, toll-free numbers are excluded since they are crap 99/100 times
 
-Per call you can:
+Per lead you can:
 
-- **Copy number**: clipboard only, does not log an outcome
-- **Voicemail** / **No answer**: stay in queue as `new`
-- **Callback**: stay in queue, prioritized next
-- **Not interested** / **Wrong number** / **Closed / Won**: leave the dial queue
+- **Previous** / **Next**: cycle through the current queue
+- **Edit**: Record an outcome for this lead
+  - **Copy number**: clipboard only, does not log an outcome
+  - **Voicemail** / **No answer**: stay in queue as `new`
+  - **Callback**: stay in queue, prioritized next
+  - **Not interested** / **Wrong number** / **Closed / Won**: leave the dial queue
 
 ## Brainstorming
 
