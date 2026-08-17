@@ -11,6 +11,7 @@ Terminal-based CRM with a dial queue and optional local LLM chat
 - [CRM](#crm)
   - [Adding Leads](#adding-leads)
   - [Tracking Leads](#tracking-leads)
+  - [Analytics](#analytics)
 - [Brainstorming](#brainstorming)
   - [Custom Materials](#custom-materials)
   - [Chat History](#chat-history)
@@ -103,6 +104,13 @@ Per lead you can:
   - **Voicemail** / **No answer**: stay in queue as `new`
   - **Callback**: stay in queue, prioritized next
   - **Do not call** / **Not interested** / **Wrong number** / **Closed / Won**: leave the dial queue
+
+### Analytics
+
+Choose **Analytics** for a snapshot of the list.
+
+- **Leads**: in-queue vs current status (`new`, `callback`, `do_not_call`, and the rest)
+- **Calls**: logged outcomes (`Voicemail`, `Callback`, `Do not call`, and the rest). One lead can count more than once if you logged more than one call.
 
 ## Brainstorming
 
