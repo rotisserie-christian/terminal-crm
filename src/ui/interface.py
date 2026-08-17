@@ -145,15 +145,15 @@ class TerminalUI:
         """
         return self._menus.confirm_lead_import(filenames)
 
-    def prompt_dial_filter(self):
+    def prompt_list_filter(self):
         """
-        Prompt for dial queue scope before starting the dial loop
+        Prompt for Full list vs location before Dial or Analytics
 
         Returns:
             Dict with 'region' ('bc', 'on', or None for full list),
             or None if cancelled/back
         """
-        return self._menus.prompt_dial_filter()
+        return self._menus.prompt_list_filter()
 
     def prompt_dial_actions(
         self,

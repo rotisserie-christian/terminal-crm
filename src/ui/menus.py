@@ -195,9 +195,9 @@ class MenuManager:
         )
         return bool(confirmed)
 
-    def prompt_dial_filter(self):
+    def prompt_list_filter(self):
         """
-        Prompt for dial queue scope before starting the dial loop
+        Prompt for Full list vs location before Dial or Analytics
 
         Returns:
             Dict with 'region' ('bc', 'on', or None for full list),
@@ -211,7 +211,7 @@ class MenuManager:
         while True:
             ansi_clear()
             scope = self._show_menu(
-                "Dial filter:",
+                "Filter:",
                 ["Full list", "Location", "< Back>"],
             )
             if scope is None or scope == "< Back>":

@@ -107,7 +107,7 @@ class DialLoop:
         """
         Run the dial loop until the queue is empty or the user goes back
         """
-        filter_choice = self.ui.prompt_dial_filter()
+        filter_choice = self.ui.prompt_list_filter()
         if filter_choice is None:
             self.ui.display_system_message("Returning to menu...")
             return
