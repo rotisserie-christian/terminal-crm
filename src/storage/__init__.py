@@ -11,6 +11,7 @@ from .crm_leads import normalize_phone, upsert_lead, merge_leads
 from .crm_json import load_leads_file, load_leads_directory, list_lead_files
 from .crm_import import import_leads_from_directory
 from .crm_dial import (
+    list_dialable_leads,
     get_next_dial_lead,
     count_dialable_leads,
     count_leads,

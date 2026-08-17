@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 from src.utils.exceptions import CrmDbError
 
@@ -142,13 +142,13 @@ def area_codes_for_region(region: Optional[str]) -> Optional[Tuple[str, ...]]:
     return tuple(geographic)
 
 
-def get_next_dial_lead(
+def list_dialable_leads(
     db: CrmDatabase,
     statuses: Sequence[str] = DIALABLE_STATUSES,
     region: Optional[str] = None,
-) -> Optional[Dict[str, Any]]:
+) -> List[Dict[str, Any]]:
     """
-    Fetch the next lead to dial from the CRM database
+    Fetch all dialable leads in queue order
 
     Priority:
     1. status = 'callback' before 'new' (and any other dialable statuses)
@@ -161,14 +161,14 @@ def get_next_dial_lead(
         region: Optional location filter ('bc', 'on'); None = full list
 
     Returns:
-        Lead as a plain dict, or None if the dial queue is empty
+        Dialable leads as plain dicts, empty if the queue is empty
     """
     if not statuses:
-        return None
+        return []
 
     area_codes = area_codes_for_region(region)
     if area_codes is not None and not area_codes:
-        return None
+        return []
 
     placeholders = ", ".join("?" for _ in statuses)
     # Prefer callback over new when both are dialable
@@ -206,19 +206,45 @@ def get_next_dial_lead(
             END,
             updated_at ASC,
             id ASC
-        LIMIT 1
     """
 
     params = tuple(statuses) + region_params + tuple(statuses)
 
     with db.connect() as conn:
-        row = conn.execute(sql, params).fetchone()
+        rows = conn.execute(sql, params).fetchall()
 
-    if row is None:
+    leads = [dict(row) for row in rows]
+    logger.debug("Listed %s dialable leads region=%s", len(leads), region)
+    return leads
+
+
+def get_next_dial_lead(
+    db: CrmDatabase,
+    statuses: Sequence[str] = DIALABLE_STATUSES,
+    region: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
+    """
+    Fetch the next lead to dial from the CRM database
+
+    Priority:
+    1. status = 'callback' before 'new' (and any other dialable statuses)
+    2. oldest updated_at (recently dialed leads rotate to the back)
+    3. lowest id as a tiebreaker
+
+    Args:
+        db: CRM database instance
+        statuses: Status values considered dialable
+        region: Optional location filter ('bc', 'on'); None = full list
+
+    Returns:
+        Lead as a plain dict, or None if the dial queue is empty
+    """
+    leads = list_dialable_leads(db, statuses=statuses, region=region)
+    if not leads:
         logger.debug("Dial queue empty region=%s", region)
         return None
 
-    lead = dict(row)
+    lead = leads[0]
     logger.debug(
         "Next dial lead id=%s phone=%s status=%s region=%s",
         lead.get("id"),
