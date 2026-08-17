@@ -17,6 +17,7 @@ OUTCOME_STATUS_MAP = {
     "no_answer": "new",
     "cb": "callback",
     "ni": "not_interested",
+    "dnc": "do_not_call",
     "wn": "wrong_number",
     "closed": "closed",
 }
@@ -27,6 +28,7 @@ OUTCOME_MENU_CHOICES = (
     ("No answer", "no_answer"),
     ("Callback", "cb"),
     ("Not interested", "ni"),
+    ("Do not call", "dnc"),
     ("Wrong number", "wn"),
     ("Closed / Won", "closed"),
 )
@@ -375,7 +377,7 @@ def log_call_outcome(
     Args:
         db: CRM database instance
         lead_id: Lead primary key
-        outcome: Outcome code (vm, cb, ni, wn, closed, no_answer)
+        outcome: Outcome code (vm, cb, ni, dnc, wn, closed, no_answer)
         description: Optional free-text notes
 
     Returns:
