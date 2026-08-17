@@ -2,11 +2,15 @@ from src.storage import (
     CrmDatabase,
     TOLL_FREE_AREA_CODES,
     area_codes_for_region,
+    can_step_dial_next,
+    can_step_dial_previous,
+    clamp_dial_index,
     count_dialable_leads,
     get_next_dial_lead,
     list_dialable_leads,
     log_call_outcome,
     phone_area_code,
+    step_dial_index,
     upsert_lead,
 )
 from src.utils.exceptions import CrmDbError
@@ -327,6 +331,60 @@ class TestListDialableLeads:
         ]
 
         assert companies == ["BC Callback", "BC New"]
+
+
+class TestDialIndexNav:
+
+    def test_clamp_empty_queue_stays_at_zero(self):
+        assert clamp_dial_index(0, 0) == 0
+        assert clamp_dial_index(-1, 0) == 0
+        assert clamp_dial_index(5, 0) == 0
+
+    def test_clamp_first_last_and_middle(self):
+        assert clamp_dial_index(0, 3) == 0
+        assert clamp_dial_index(1, 3) == 1
+        assert clamp_dial_index(2, 3) == 2
+
+    def test_clamp_does_not_wrap(self):
+        assert clamp_dial_index(-1, 3) == 0
+        assert clamp_dial_index(3, 3) == 2
+        assert clamp_dial_index(99, 3) == 2
+
+    def test_clamp_single_lead(self):
+        assert clamp_dial_index(0, 1) == 0
+        assert clamp_dial_index(-1, 1) == 0
+        assert clamp_dial_index(1, 1) == 0
+
+    def test_step_next_from_first_and_middle(self):
+        assert step_dial_index(0, 1, 3) == 1
+        assert step_dial_index(1, 1, 3) == 2
+
+    def test_step_previous_from_last_and_middle(self):
+        assert step_dial_index(2, -1, 3) == 1
+        assert step_dial_index(1, -1, 3) == 0
+
+    def test_step_clamps_at_ends(self):
+        assert step_dial_index(0, -1, 3) == 0
+        assert step_dial_index(2, 1, 3) == 2
+
+    def test_step_single_lead_stays_put(self):
+        assert step_dial_index(0, 1, 1) == 0
+        assert step_dial_index(0, -1, 1) == 0
+
+    def test_step_empty_queue_stays_at_zero(self):
+        assert step_dial_index(0, 1, 0) == 0
+        assert step_dial_index(0, -1, 0) == 0
+
+    def test_previous_disabled_at_first_and_empty(self):
+        assert can_step_dial_previous(0) is False
+        assert can_step_dial_previous(1) is True
+
+    def test_next_disabled_at_last_single_and_empty(self):
+        assert can_step_dial_next(0, 0) is False
+        assert can_step_dial_next(0, 1) is False
+        assert can_step_dial_next(2, 3) is False
+        assert can_step_dial_next(0, 3) is True
+        assert can_step_dial_next(1, 3) is True
 
 
 class TestLogCallOutcome:
