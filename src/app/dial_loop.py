@@ -4,10 +4,14 @@ import questionary
 
 from src.storage import (
     CrmDatabase,
+    can_step_dial_next,
+    can_step_dial_previous,
+    clamp_dial_index,
     count_dialable_leads,
     count_leads,
-    get_next_dial_lead,
+    list_dialable_leads,
     log_call_outcome,
+    step_dial_index,
 )
 from src.ui import TerminalUI
 from src.ui.terminal import ansi_clear, print_plain, show_cursor, sync_after_rich
@@ -28,10 +32,9 @@ class DialLoop:
 
     Responsibilities:
     - Prompt for optional location filter
-    - Fetch the next dialable lead
-    - Display lead details
-    - Prompt for outcome + description
-    - Persist outcome and advance
+    - Browse dialable leads with previous / next
+    - Prompt for outcome + description on edit
+    - Persist outcome and land on a neighbor
     """
 
     def __init__(self, ui: TerminalUI, crm_db: CrmDatabase):
@@ -83,6 +86,23 @@ class DialLoop:
         print_plain("")
         self._press_any_key()
 
+    @staticmethod
+    def _neighbor_lead_id(queue, index):
+        """Id of the next lead in queue order, else the previous, else None."""
+        if index + 1 < len(queue):
+            return queue[index + 1]["id"]
+        if index - 1 >= 0:
+            return queue[index - 1]["id"]
+        return None
+
+    @staticmethod
+    def _index_of_lead(queue, lead_id):
+        """Index of lead_id in queue, or None if missing."""
+        for i, lead in enumerate(queue):
+            if lead["id"] == lead_id:
+                return i
+        return None
+
     def run(self) -> None:
         """
         Run the dial loop until the queue is empty or the user goes back
@@ -94,21 +114,36 @@ class DialLoop:
 
         region = filter_choice.get("region")
 
+        with self.ui.status("Loading dial queue..."):
+            queue = list_dialable_leads(self.crm_db, region=region)
+        index = 0
+
+        if not queue:
+            self._show_empty_queue_and_exit(region=region)
+            return
+
         while True:
-            ansi_clear()
-            with self.ui.status("Loading next lead..."):
-                remaining = count_dialable_leads(self.crm_db, region=region)
-                lead = get_next_dial_lead(self.crm_db, region=region)
+            index = clamp_dial_index(index, len(queue))
+            lead = queue[index]
+            remaining = len(queue)
 
-            if lead is None:
-                self._show_empty_queue_and_exit(region=region)
-                return
-
-            # prompt_call_outcome owns the screen (dial Panel + menu)
-            result = self.ui.prompt_call_outcome(lead=lead, remaining=remaining)
+            result = self.ui.prompt_dial_actions(
+                lead=lead,
+                remaining=remaining,
+                can_previous=can_step_dial_previous(index),
+                can_next=can_step_dial_next(index, remaining),
+            )
             if result is None:
                 self.ui.display_system_message("Returning to menu...")
                 return
+
+            action = result.get("action")
+            if action == "previous":
+                index = step_dial_index(index, -1, remaining)
+                continue
+            if action == "next":
+                index = step_dial_index(index, 1, remaining)
+                continue
 
             try:
                 with self.ui.status("Saving outcome..."):
@@ -127,3 +162,20 @@ class DialLoop:
             self.ui.display_system_message(
                 f"Logged {logged['outcome']} → status {logged['status']}"
             )
+
+            neighbor_id = self._neighbor_lead_id(queue, index)
+            with self.ui.status("Loading dial queue..."):
+                queue = list_dialable_leads(self.crm_db, region=region)
+
+            if not queue:
+                self._show_empty_queue_and_exit(region=region)
+                return
+
+            if neighbor_id is not None:
+                found = self._index_of_lead(queue, neighbor_id)
+                if found is not None:
+                    index = found
+                else:
+                    index = clamp_dial_index(index, len(queue))
+            else:
+                index = 0
