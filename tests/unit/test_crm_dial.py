@@ -4,6 +4,7 @@ from src.storage import (
     area_codes_for_region,
     count_dialable_leads,
     get_next_dial_lead,
+    list_dialable_leads,
     log_call_outcome,
     phone_area_code,
     upsert_lead,
@@ -131,6 +132,8 @@ class TestDialRegionFilter:
         with pytest.raises(ValueError, match="Unknown dial region"):
             get_next_dial_lead(db, region="qc")
         with pytest.raises(ValueError, match="Unknown dial region"):
+            list_dialable_leads(db, region="qc")
+        with pytest.raises(ValueError, match="Unknown dial region"):
             count_dialable_leads(db, region="qc")
 
 
@@ -214,6 +217,116 @@ class TestGetNextDialLead:
 
         assert get_next_dial_lead(db, statuses=()) is None
         assert count_dialable_leads(db, statuses=()) == 0
+
+
+class TestListDialableLeads:
+
+    def test_returns_empty_when_queue_empty(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+
+        assert list_dialable_leads(db) == []
+
+    def test_first_item_matches_get_next_dial_lead(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "New Co", "phone": "5550101001"})
+        upsert_lead(db, {"company": "Callback Co", "phone": "5550101002"})
+        _set_status(db, "5550101002", "callback")
+
+        leads = list_dialable_leads(db)
+        nxt = get_next_dial_lead(db)
+
+        assert len(leads) == 2
+        assert nxt is not None
+        assert leads[0] == nxt
+        assert leads[0]["company"] == "Callback Co"
+
+    def test_prefers_callback_over_new(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "New Co", "phone": "5550101001"})
+        upsert_lead(db, {"company": "Callback Co", "phone": "5550101002"})
+        _set_status(db, "5550101002", "callback")
+
+        companies = [lead["company"] for lead in list_dialable_leads(db)]
+
+        assert companies == ["Callback Co", "New Co"]
+
+    def test_skips_non_dialable_statuses(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "Closed Co", "phone": "5550101001"})
+        upsert_lead(db, {"company": "Fresh Co", "phone": "5550101002"})
+        _set_status(db, "5550101001", "closed")
+
+        leads = list_dialable_leads(db)
+
+        assert [lead["company"] for lead in leads] == ["Fresh Co"]
+        assert leads[0]["status"] == "new"
+
+    def test_orders_same_status_by_oldest_updated_at(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "First", "phone": "5550101001"})
+        upsert_lead(db, {"company": "Second", "phone": "5550101002"})
+
+        with db.connect() as conn:
+            conn.execute(
+                "UPDATE leads SET updated_at = ? WHERE phone = ?",
+                ("2024-01-01T00:00:00+00:00", "5550101001"),
+            )
+            conn.execute(
+                "UPDATE leads SET updated_at = ? WHERE phone = ?",
+                ("2024-06-01T00:00:00+00:00", "5550101002"),
+            )
+
+        companies = [lead["company"] for lead in list_dialable_leads(db)]
+
+        assert companies == ["First", "Second"]
+
+    def test_empty_statuses_returns_empty(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "Acme Roofing", "phone": "5550101001"})
+
+        assert list_dialable_leads(db, statuses=()) == []
+
+    def test_full_list_includes_all_numbers(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        _seed_region_leads(db)
+
+        companies = [lead["company"] for lead in list_dialable_leads(db)]
+
+        assert companies == ["BC Co", "ON Co", "Toll Free Co"]
+
+    def test_region_filter_returns_only_matching_location(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        _seed_region_leads(db)
+
+        bc = [lead["company"] for lead in list_dialable_leads(db, region="bc")]
+        on = [lead["company"] for lead in list_dialable_leads(db, region="on")]
+
+        assert bc == ["BC Co"]
+        assert on == ["ON Co"]
+
+    def test_location_filter_excludes_toll_free(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "Toll Free Co", "phone": "18885550103"})
+
+        assert list_dialable_leads(db, region="bc") == []
+        assert list_dialable_leads(db, region="on") == []
+        assert [lead["company"] for lead in list_dialable_leads(db)] == [
+            "Toll Free Co"
+        ]
+
+    def test_region_filter_respects_callback_priority(self, tmp_path):
+        db = CrmDatabase(str(tmp_path / "crm.db"))
+        upsert_lead(db, {"company": "BC New", "phone": "6045550101"})
+        upsert_lead(db, {"company": "BC Callback", "phone": "7785550102"})
+        upsert_lead(db, {"company": "ON Callback", "phone": "4165550103"})
+        _set_status(db, "7785550102", "callback")
+        _set_status(db, "4165550103", "callback")
+
+        companies = [
+            lead["company"] for lead in list_dialable_leads(db, region="bc")
+        ]
+
+        assert companies == ["BC Callback", "BC New"]
 
 
 class TestLogCallOutcome:
