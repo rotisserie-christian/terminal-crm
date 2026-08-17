@@ -102,7 +102,7 @@ Per lead you can:
   - **Copy number**: clipboard only, does not log an outcome
   - **Voicemail** / **No answer**: stay in queue as `new`
   - **Callback**: stay in queue, prioritized next
-  - **Not interested** / **Wrong number** / **Closed / Won**: leave the dial queue
+  - **Do not call** / **Not interested** / **Wrong number** / **Closed / Won**: leave the dial queue
 
 ## Brainstorming
 
