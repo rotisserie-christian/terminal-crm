@@ -16,6 +16,11 @@ from .crm_region import (
     REGION_AREA_CODES,
     TOLL_FREE_AREA_CODES,
 )
+from .crm_outcomes import (
+    log_call_outcome,
+    OUTCOME_STATUS_MAP,
+    OUTCOME_MENU_CHOICES,
+)
 from .crm_dial import (
     list_dialable_leads,
     get_next_dial_lead,
@@ -25,8 +30,5 @@ from .crm_dial import (
     can_step_dial_next,
     count_dialable_leads,
     count_leads,
-    log_call_outcome,
     DIALABLE_STATUSES,
-    OUTCOME_STATUS_MAP,
-    OUTCOME_MENU_CHOICES,
 )

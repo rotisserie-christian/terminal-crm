@@ -6,5 +6,6 @@
 - `crm_json.py` - Load and validate lead lists from JSON files
 - `crm_import.py` - Import orchestration: load JSON leads and merge into SQLite
 - `crm_region.py` - Dial location filter (NANP area codes, toll-free exclusion)
-- `crm_dial.py` - Dial queue helpers (next lead, dialable counts, log outcomes)
+- `crm_outcomes.py` - Call outcome maps and logging
+- `crm_dial.py` - Dial queue helpers (list/next/count, index navigation)
 

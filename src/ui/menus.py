@@ -1,7 +1,7 @@
 import questionary
 import pyperclip
 
-from src.storage.crm_dial import OUTCOME_MENU_CHOICES
+from src.storage.crm_outcomes import OUTCOME_MENU_CHOICES
 from .terminal import (
     ansi_clear,
     hidden_cursor,
