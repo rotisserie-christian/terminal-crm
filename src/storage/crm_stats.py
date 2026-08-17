@@ -10,6 +10,9 @@ LEAD_STATUSES = tuple(
     dict.fromkeys(("new", "callback") + tuple(OUTCOME_STATUS_MAP.values()))
 )
 
+# Outcome codes shown in analytics (zeros when none match)
+OUTCOME_CODES = tuple(OUTCOME_STATUS_MAP.keys())
+
 
 def _empty_status_counts() -> Dict[str, Any]:
     by_status = {status: 0 for status in LEAD_STATUSES}
@@ -66,4 +69,62 @@ def lead_status_counts(
 
     result["total"] = total
     result["queue"] = sum(by_status.get(status, 0) for status in DIALABLE_STATUSES)
+    return result
+
+
+def _empty_outcome_counts() -> Dict[str, Any]:
+    return {
+        "total": 0,
+        "by_outcome": {code: 0 for code in OUTCOME_CODES},
+    }
+
+
+def outcome_counts(
+    db: CrmDatabase,
+    region: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Count logged call outcomes, optionally filtered by lead location
+
+    Each call_outcomes row counts once. Location uses the lead's phone.
+
+    Args:
+        db: CRM database instance
+        region: Optional location filter ('bc', 'on'); None = full list
+
+    Returns:
+        Dict with total and by_outcome counts
+    """
+    area_codes = area_codes_for_region(region)
+    if area_codes is not None and not area_codes:
+        return _empty_outcome_counts()
+
+    if area_codes is None:
+        sql = "SELECT outcome, COUNT(*) AS n FROM call_outcomes GROUP BY outcome"
+        params: tuple = ()
+    else:
+        phone_sql = _PHONE_AREA_CODE_SQL.replace("phone", "leads.phone")
+        area_placeholders = ", ".join("?" for _ in area_codes)
+        sql = (
+            "SELECT call_outcomes.outcome AS outcome, COUNT(*) AS n "
+            "FROM call_outcomes "
+            "INNER JOIN leads ON leads.id = call_outcomes.lead_id "
+            f"WHERE {phone_sql} IN ({area_placeholders}) "
+            "GROUP BY call_outcomes.outcome"
+        )
+        params = area_codes
+
+    with db.connect() as conn:
+        rows = conn.execute(sql, params).fetchall()
+
+    result = _empty_outcome_counts()
+    by_outcome = result["by_outcome"]
+    total = 0
+    for row in rows:
+        code = row["outcome"]
+        count = int(row["n"])
+        total += count
+        by_outcome[code] = by_outcome.get(code, 0) + count
+
+    result["total"] = total
     return result

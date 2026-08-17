@@ -8,5 +8,5 @@
 - `crm_region.py` - Dial location filter (NANP area codes, toll-free exclusion)
 - `crm_outcomes.py` - Call outcome maps and logging
 - `crm_dial.py` - Dial queue helpers (list/next/count, index navigation)
-- `crm_stats.py` - Lead status analytics counts
+- `crm_stats.py` - Lead status and call outcome analytics counts
 
