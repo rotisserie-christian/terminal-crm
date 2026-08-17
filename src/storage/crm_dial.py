@@ -255,6 +255,54 @@ def get_next_dial_lead(
     return lead
 
 
+def clamp_dial_index(index: int, count: int) -> int:
+    """
+    Keep a dial-queue index inside the list
+
+    Empty queues stay at 0. Does not wrap.
+
+    Args:
+        index: Current or requested position
+        count: Number of leads in the queue
+
+    Returns:
+        Index in [0, count), or 0 when the queue is empty
+    """
+    if count <= 0:
+        return 0
+    if index < 0:
+        return 0
+    last = count - 1
+    if index > last:
+        return last
+    return index
+
+
+def step_dial_index(index: int, delta: int, count: int) -> int:
+    """
+    Move one step in the dial queue without wrapping
+
+    Args:
+        index: Current position
+        delta: Direction (-1 previous, +1 next)
+        count: Number of leads in the queue
+
+    Returns:
+        Clamped index. Empty queues stay at 0.
+    """
+    return clamp_dial_index(index + delta, count)
+
+
+def can_step_dial_previous(index: int) -> bool:
+    """True when Previous should be enabled."""
+    return index > 0
+
+
+def can_step_dial_next(index: int, count: int) -> bool:
+    """True when Next should be enabled."""
+    return count > 0 and index < count - 1
+
+
 def count_dialable_leads(
     db: CrmDatabase,
     statuses: Sequence[str] = DIALABLE_STATUSES,
