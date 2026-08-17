@@ -49,10 +49,10 @@ class MenuManager:
 
         Args:
             title: Menu title string
-            choices: List of strings (menu options)
+            choices: List of strings or questionary.Choice values
 
         Returns:
-            Selected choice string, or None if cancelled
+            Selected choice (string or Choice value), or None if cancelled
         """
         self._handoff_to_prompt()
         try:
@@ -211,6 +211,73 @@ class MenuManager:
                 if place is None or place == "< Back>":
                     break
                 return {"region": location_labels[place]}
+
+    def prompt_dial_actions(
+        self,
+        lead=None,
+        remaining=None,
+        can_previous=False,
+        can_next=False,
+    ):
+        """
+        Prompt to browse the dial queue or edit the current lead
+
+        Draws the dial lead Panel, then Previous / Next / Edit.
+        Edit opens the existing call-outcome menu. Back from that menu
+        returns here.
+
+        Args:
+            lead: Lead dict for the card and nested outcome menu
+            remaining: Optional dialable queue count for the card header
+            can_previous: When False, Previous is disabled
+            can_next: When False, Next is disabled
+
+        Returns:
+            Dict with 'action' of 'previous', 'next', or 'outcome'
+            (outcome includes 'outcome' and 'description'),
+            or None if cancelled/back
+        """
+        lead = lead or {}
+        back_label = "< Back>"
+
+        while True:
+            ansi_clear()
+            if lead:
+                self.display.display_dial_lead(lead, remaining=remaining)
+
+            choices = [
+                questionary.Choice(
+                    title="Previous",
+                    value="previous",
+                    disabled=False if can_previous else "Already at first lead",
+                ),
+                questionary.Choice(
+                    title="Next",
+                    value="next",
+                    disabled=False if can_next else "Already at last lead",
+                ),
+                questionary.Choice("Edit", value="edit"),
+                back_label,
+            ]
+
+            choice = self._show_menu("Dial lead:", choices)
+            if choice is None or choice == back_label:
+                return None
+
+            if choice == "previous":
+                return {"action": "previous"}
+            if choice == "next":
+                return {"action": "next"}
+
+            result = self.prompt_call_outcome(lead=lead, remaining=remaining)
+            if result is None:
+                continue
+
+            return {
+                "action": "outcome",
+                "outcome": result["outcome"],
+                "description": result.get("description", ""),
+            }
 
     def prompt_call_outcome(self, lead=None, remaining=None):
         """

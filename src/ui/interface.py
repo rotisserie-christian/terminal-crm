@@ -125,6 +125,33 @@ class TerminalUI:
         """
         return self._menus.prompt_dial_filter()
 
+    def prompt_dial_actions(
+        self,
+        lead=None,
+        remaining=None,
+        can_previous=False,
+        can_next=False,
+    ):
+        """
+        Prompt to browse the dial queue or edit the current lead
+
+        Args:
+            lead: Lead dict for the card and nested outcome menu
+            remaining: Optional dialable queue count for the card header
+            can_previous: When False, Previous is disabled
+            can_next: When False, Next is disabled
+
+        Returns:
+            Dict with 'action' of 'previous', 'next', or 'outcome',
+            or None if cancelled/back
+        """
+        return self._menus.prompt_dial_actions(
+            lead=lead,
+            remaining=remaining,
+            can_previous=can_previous,
+            can_next=can_next,
+        )
+
     def prompt_call_outcome(self, lead=None, remaining=None):
         """
         Prompt for a call outcome and optional description
