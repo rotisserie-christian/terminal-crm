@@ -6,6 +6,7 @@ from src.storage import (
     lead_status_counts,
     log_call_outcome,
     outcome_counts,
+    ratio_bar,
     upsert_lead,
 )
 
@@ -186,3 +187,24 @@ class TestOutcomeCounts:
 
         with pytest.raises(ValueError, match="Unknown dial region"):
             outcome_counts(db, region="qc")
+
+
+class TestRatioBar:
+
+    def test_zero_total_is_empty(self):
+        assert ratio_bar(0, 0, width=12) == "░░░░░░░░░░░░"
+        assert ratio_bar(5, 0, width=12) == "░░░░░░░░░░░░"
+
+    def test_zero_count_is_empty(self):
+        assert ratio_bar(0, 10, width=12) == "░░░░░░░░░░░░"
+
+    def test_half_and_full(self):
+        assert ratio_bar(6, 12, width=12) == "██████░░░░░░"
+        assert ratio_bar(12, 12, width=12) == "████████████"
+
+    def test_count_above_total_clamps(self):
+        assert ratio_bar(20, 10, width=8) == "████████"
+
+    def test_width_non_positive_is_empty_string(self):
+        assert ratio_bar(1, 1, width=0) == ""
+        assert ratio_bar(1, 1, width=-1) == ""

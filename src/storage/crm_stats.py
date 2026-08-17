@@ -128,3 +128,33 @@ def outcome_counts(
 
     result["total"] = total
     return result
+
+
+def ratio_bar(count: int, total: int, width: int = 12) -> str:
+    """
+    Build a fixed-width bar for count / total
+
+    Uses filled and empty block characters. Empty or zero totals
+    render as all empty. Values are clamped to the bar width.
+
+    Args:
+        count: Portion to fill
+        total: Denominator
+        width: Bar width in characters
+
+    Returns:
+        String of length width (empty string if width <= 0)
+    """
+    if width <= 0:
+        return ""
+
+    if total <= 0 or count <= 0:
+        filled = 0
+    else:
+        filled = round((count / total) * width)
+        if filled < 0:
+            filled = 0
+        if filled > width:
+            filled = width
+
+    return ("█" * filled) + ("░" * (width - filled))
