@@ -104,8 +104,8 @@ class TerminalUI:
         Display the main menu
         
         Returns:
-            str: Selected option ('Add Leads', 'Dial', 'New Chat', 'Load Chat',
-                 'Settings', or 'Exit')
+            str: Selected option ('Add Leads', 'Dial', 'Analytics', 'New Chat',
+                 'Load Chat', 'Settings', or 'Exit')
         """
         return self._menus.show_main_menu()
 

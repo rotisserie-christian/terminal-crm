@@ -95,6 +95,14 @@ def main():
                 from src.app.dial_loop import DialLoop
                 dial_loop = DialLoop(ui, crm_db)
             dial_loop.run()
+
+        elif choice == "Analytics":
+            from src.ui.terminal import ansi_clear
+            ansi_clear()
+            with ui.status("Loading analytics..."):
+                from src.app.analytics import AnalyticsScreen
+                analytics = AnalyticsScreen(ui, crm_db)
+            analytics.run()
         
         elif choice == "Settings":
             ManageSettings(ui.console).run()

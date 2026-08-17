@@ -106,14 +106,22 @@ class MenuManager:
         Display the main menu
 
         Returns:
-            str: Selected option ('Add Leads', 'Dial', 'New Chat', 'Load Chat',
-                 'Settings', or 'Exit')
+            str: Selected option ('Add Leads', 'Dial', 'Analytics', 'New Chat',
+                 'Load Chat', 'Settings', or 'Exit')
         """
         # ANSI clear only — no Rich panel before questionary (avoids stray cursor)
         ansi_clear()
         choice = self._show_menu(
             "Terminal CRM — Select an option:",
-            ["Add Leads", "Dial", "New Chat", "Load Chat", "Settings", "Exit"],
+            [
+                "Add Leads",
+                "Dial",
+                "Analytics",
+                "New Chat",
+                "Load Chat",
+                "Settings",
+                "Exit",
+            ],
         )
         return choice if choice else "Exit"
 
