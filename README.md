@@ -1,9 +1,9 @@
 # Terminal CRM
 
-Terminal-based CRM with a dial queue and optional local LLM chat
+Terminal-based CRM. can be used to track lead interactions, output analytics, and run local LLM chats.
 
 > [!NOTE]  
-> This is not an auto-dialer or a spam script. It's for manually working small lists and brainstorming in the privacy of your own hardware. 
+> LLM features are for brainstorming sales scripts. Nothing in this repo does any automated spam actions.
 
 ## Table of Contents
 
