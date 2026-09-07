@@ -1,6 +1,6 @@
 ### /memory
 
-Add files here for RAG (Retrieval-Augmented Generation). Any relevant chunks will be automatically retrieved and piped into context when relevant to the conversation.
+Add files here for RAG. Any relevant chunks will be automatically retrieved and piped into context when relevant to the conversation.
 
 **Supported file types**: `.md` and `.txt` files
 
